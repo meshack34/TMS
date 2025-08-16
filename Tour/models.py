@@ -3,22 +3,30 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 
-
 class Client(models.Model):
-    first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
-    address = models.TextField(blank=True, null=True)  
-    notes = models.TextField(blank=True, null=True)    
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return self.name
 
-    def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+
+# class Client(models.Model):
+#     first_name = models.CharField(max_length=150)
+#     last_name = models.CharField(max_length=150)
+#     email = models.EmailField(blank=True, null=True)
+#     phone = models.CharField(max_length=20, blank=True, null=True)
+#     created_at = models.DateTimeField(default=timezone.now)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     address = models.TextField(blank=True, null=True)  
+#     notes = models.TextField(blank=True, null=True)    
+
+#     def __str__(self):
+#         return f"{self.first_name} {self.last_name}"
+
+#     def full_name(self):
+#         return f"{self.first_name} {self.last_name}"
 
 
 class Booking(models.Model):
@@ -70,6 +78,13 @@ class Destination(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.booking.client.name})"
+
+class DestinationImage(models.Model):
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='galleries')
+    image = models.ImageField(upload_to='destination_gallery/')
+
+    def __str__(self):
+        return f"Image for {self.destination.name}"
 
 
 class Stay(models.Model):

@@ -10,11 +10,11 @@ from django.utils.decorators import method_decorator
 from django.db.models import Q, Prefetch
 
 from .models import (
-    Client, Booking, Destination, Activity, Stay, DiningExpense, TravelLeg, Restaurant
+    Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, TravelLeg, Restaurant
 )
 from .forms import (
     PlannerCreationForm,
-    ClientForm, BookingForm, DestinationForm,
+    ClientForm, BookingForm, DestinationForm, DestinationImageForm,
     ActivityForm, StayForm, DiningExpenseForm, RestaurantForm, TravelLegForm
 )
 
@@ -206,6 +206,7 @@ class DestinationDetailView(DetailView):
         return (
             Destination.objects.select_related("booking", "booking__client")
             .prefetch_related(
+                Prefetch("galleries", queryset=DestinationImage.objects.all()),
                 Prefetch("stays", queryset=Stay.objects.all()),
                 Prefetch("activities", queryset=Activity.objects.all().order_by("date", "start_time")),
                 Prefetch("dining_expenses", queryset=DiningExpense.objects.select_related("restaurant")),
@@ -268,6 +269,25 @@ def delete_destination(request, id):
 
 
 # ---------- Upload/Add child records (aligned to current models) ----------
+
+@login_required
+def upload_destination_image(request, gallery_id):
+    destination = get_object_or_404(Destination, id=gallery_id, user=request.user)
+
+    if request.method == 'POST':
+        img_form = DestinationImageForm(request.POST, request.FILES)
+        if img_form.is_valid():
+            image = img_form.save(commit=False)
+            image.destination = destination
+            image.save()
+            return redirect('destination_detail', id=destination.id)
+    else:
+        img_form = DestinationImageForm()
+    
+    return render(request, 'tour/upload_destination_image.html', {'form': img_form, 'destination': destination})
+
+
+
 @login_required
 def upload_activity(request, destination_id):
     destination = get_object_or_404(Destination, id=destination_id)

@@ -70,6 +70,8 @@
             {% endif %}
 
             <div class="d-flex flex-wrap gap-2 mt-3">
+              
+              <a href="{% url 'upload_destination_image' destination.id %}" class="btn btn-outline-success btn-sm">Add Image</a>
               <a href="{% url 'upload_stay' destination.id %}" class="btn btn-outline-success btn-sm">Add Stay</a>
               <a href="{% url 'upload_activity' destination.id %}" class="btn btn-outline-success btn-sm">Add Activity</a>
               <a href="{% url 'upload_dining' destination.id %}" class="btn btn-outline-success btn-sm">Add Dining</a>

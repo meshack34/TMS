@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django import forms
 
 from .models import (
-    Client, Booking, Destination, Activity, Stay, DiningExpense, TravelLeg, Restaurant
+    Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, TravelLeg, Restaurant
 )
 
 
@@ -26,7 +26,16 @@ class PlannerCreationForm(UserCreationForm):
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ["first_name", "last_name", "email", "phone", "address", "notes"]
+        fields = ["name", "email", "phone"]
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ["client", "start_date", "end_date"]
+        widgets = {
+            "start_date": forms.DateInput(attrs={"type": "date"}),
+            "end_date": forms.DateInput(attrs={"type": "date"}),
+        }
 
 
 class DestinationForm(forms.ModelForm):
@@ -62,14 +71,13 @@ class DestinationForm(forms.ModelForm):
         return cleaned
 
 
-class BookingForm(forms.ModelForm):
+
+class DestinationImageForm(forms.ModelForm):
     class Meta:
-        model = Booking
-        fields = ["client", "start_date", "end_date"]
-        widgets = {
-            "start_date": forms.DateInput(attrs={"type": "date"}),
-            "end_date": forms.DateInput(attrs={"type": "date"}),
-        }
+        model = DestinationImage
+        fields = ['image']
+
+
 
 
 class ActivityForm(forms.ModelForm):

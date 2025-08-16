@@ -1,8 +1,0 @@
-{% extends "main.html" %}
-{% block content %}
-<h2>Delete "{{ destination.name }}"?</h2>
-<form method="post">{% csrf_token %}
-  <button class="btn btn-danger" type="submit">Confirm Delete</button>
-  <a class="btn btn-secondary" href="{% url 'dashboard' %}">Cancel</a>
-</form>
-{% endblock %}
