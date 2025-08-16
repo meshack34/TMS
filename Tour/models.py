@@ -119,6 +119,8 @@ class Activity(models.Model):
 class Restaurant(models.Model):
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name="restaurants")
     name = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='restaurants/')
+    description = models.TextField()
 
     def __str__(self):
         return f"{self.name} ({self.destination.name})"

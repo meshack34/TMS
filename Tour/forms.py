@@ -72,21 +72,7 @@ class DestinationForm(forms.ModelForm):
 
 
 
-# forms.py
-from django import forms
-from .models import DestinationImage
-
-# ➊ allow multiple files on a ClearableFileInput
-class MultiFileClearableInput(forms.ClearableFileInput):
-    allow_multiple_selected = True
-
 class DestinationImageForm(forms.ModelForm):
-    # keep the field name "image" so request.FILES.getlist("image") still works
-    image = forms.ImageField(
-        widget=MultiFileClearableInput(attrs={"multiple": True}),
-        required=True,
-    )
-
     class Meta:
         model = DestinationImage
         fields = ["image"]

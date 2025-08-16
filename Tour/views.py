@@ -273,22 +273,43 @@ def delete_destination(request, id):
 
 # ---------- Upload/Add child records (aligned to current models) ----------
 
+# @login_required
+# def upload_destination_image(request, pk):
+#     # no user filter here (Destination has no user field)
+#     destination = get_object_or_404(Destination, pk=pk)
+
+#     if request.method == "POST":
+#         form = DestinationImageForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             files = request.FILES.getlist("image")
+#             if not files:
+#                 messages.error(request, "Please choose at least one image.")
+#             else:
+#                 for f in files:
+#                     DestinationImage.objects.create(destination=destination, image=f)
+#                 messages.success(request, f"Uploaded {len(files)} image(s).")
+#                 return redirect("destination_detail", pk=destination.pk)
+#     else:
+#         form = DestinationImageForm()
+
+#     return render(
+#         request,
+#         "tour/upload_destination_image.html",
+#         {"form": form, "destination": destination},
+#     )
+
 @login_required
 def upload_destination_image(request, pk):
-    # no user filter here (Destination has no user field)
     destination = get_object_or_404(Destination, pk=pk)
 
     if request.method == "POST":
         form = DestinationImageForm(request.POST, request.FILES)
         if form.is_valid():
-            files = request.FILES.getlist("image")
-            if not files:
-                messages.error(request, "Please choose at least one image.")
-            else:
-                for f in files:
-                    DestinationImage.objects.create(destination=destination, image=f)
-                messages.success(request, f"Uploaded {len(files)} image(s).")
-                return redirect("destination_detail", pk=destination.pk)
+            dest_img = form.save(commit=False)
+            dest_img.destination = destination
+            dest_img.save()
+            messages.success(request, "Image uploaded successfully.")
+            return redirect("destination_detail", pk=destination.pk)
     else:
         form = DestinationImageForm()
 
@@ -297,6 +318,7 @@ def upload_destination_image(request, pk):
         "tour/upload_destination_image.html",
         {"form": form, "destination": destination},
     )
+
 
 @login_required
 def upload_activity(request, destination_id):
