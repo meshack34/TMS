@@ -9,6 +9,9 @@ from django.views.generic import ListView, CreateView, DetailView
 from django.utils.decorators import method_decorator
 from django.db.models import Q, Prefetch
 
+
+
+
 from .models import (
     Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, TravelLeg, Restaurant
 )
@@ -269,11 +272,6 @@ def delete_destination(request, id):
 
 
 # ---------- Upload/Add child records (aligned to current models) ----------
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib import messages
-from .models import Destination, DestinationImage
-from .forms import DestinationImageForm
 
 @login_required
 def upload_destination_image(request, pk):
@@ -299,25 +297,6 @@ def upload_destination_image(request, pk):
         "tour/upload_destination_image.html",
         {"form": form, "destination": destination},
     )
-
-
-# @login_required
-# def upload_destination_image(request, gallery_id):
-#     destination = get_object_or_404(Destination, id=gallery_id, user=request.user)
-
-#     if request.method == 'POST':
-#         img_form = DestinationImageForm(request.POST, request.FILES)
-#         if img_form.is_valid():
-#             image = img_form.save(commit=False)
-#             image.destination = destination
-#             image.save()
-#             return redirect('destination_detail', id=destination.id)
-#     else:
-#         img_form = DestinationImageForm()
-    
-#     return render(request, 'tour/upload_destination_image.html', {'form': img_form, 'destination': destination})
-
-
 
 @login_required
 def upload_activity(request, destination_id):
