@@ -1,12 +1,11 @@
-{% comment %} upload_destination_image.html {% endcomment %}
-
 {% extends 'main.html' %}
 {% block content %}
 <h2>Upload Image for {{ destination.name }}</h2>
 
-<form method="post" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Upload</button>
+    <button type="submit">Upload</button>
 </form>
+
 {% endblock %}

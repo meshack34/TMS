@@ -70,7 +70,6 @@
             {% endif %}
 
             <div class="d-flex flex-wrap gap-2 mt-3">
-              
               <a href="{% url 'upload_destination_image' destination.id %}" class="btn btn-outline-success btn-sm">Add Image</a>
               <a href="{% url 'upload_stay' destination.id %}" class="btn btn-outline-success btn-sm">Add Stay</a>
               <a href="{% url 'upload_activity' destination.id %}" class="btn btn-outline-success btn-sm">Add Activity</a>
@@ -79,6 +78,34 @@
             </div>
           </div>
         </div>
+
+        
+        <!-- galleries -->
+            <div class="tab-pane fade" id="gallery" role="tabpanel">
+              {% if destination.galleries.all %}
+                <div class="row g-3">
+                  {% for img in destination.galleries.all %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                      <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#lightboxModal{{ forloop.counter }}">
+                        <img src="{{ img.image.url }}" class="img-fluid rounded shadow-sm gallery-thumb" alt="Gallery Image">
+                      </a>
+                    </div>
+
+                    <!-- Modal for lightbox -->
+                    <div class="modal fade" id="lightboxModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content bg-transparent border-0">
+                          <img src="{{ img.image.url }}" class="img-fluid rounded shadow" alt="Gallery Image">
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="text-muted">No gallery images yet.</p>
+              {% endif %}
+            </div>
+
 
         <!-- Stays -->
         <div class="tab-pane fade" id="stays" role="tabpanel">
@@ -109,21 +136,6 @@
           {% endif %}
         </div>
 
-
-                    <!-- Gallery -->
-              <div class="tab-pane fade" id="gallery" role="tabpanel">
-                {% if destination.destinationimage_set.all %}
-                  <div class="row g-3">
-                    {% for img in destination.destinationimage_set.all %}
-                      <div class="col-6 col-md-4 col-lg-3">
-                        <img src="{{ img.image.url }}" class="img-fluid rounded shadow-sm" alt="Gallery Image">
-                      </div>
-                    {% endfor %}
-                  </div>
-                {% else %}
-                  <p class="text-muted">No gallery images yet.</p>
-                {% endif %}
-              </div>
 
 
         <!-- Activities -->

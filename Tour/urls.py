@@ -28,7 +28,8 @@ urlpatterns = [
     path("destinations/<int:id>/delete/", views.delete_destination, name="delete_destination"),
 
     # uploads (child records)
-    path("destinations/<int:gallery_id>/upload-image/", views.upload_destination_image, name="upload_destination_image"),
+    path("destinations/<int:pk>/upload-image/", views.upload_destination_image, name="upload_destination_image"),
+
     path("destinations/<int:destination_id>/activities/new/", views.upload_activity, name="upload_activity"),
     path("destinations/<int:destination_id>/stays/new/", views.upload_stay, name="upload_stay"),
     path("destinations/<int:destination_id>/dining/new/", views.upload_dining_expense, name="upload_dining"),

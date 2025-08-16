@@ -269,22 +269,53 @@ def delete_destination(request, id):
 
 
 # ---------- Upload/Add child records (aligned to current models) ----------
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+from .models import Destination, DestinationImage
+from .forms import DestinationImageForm
 
 @login_required
-def upload_destination_image(request, gallery_id):
-    destination = get_object_or_404(Destination, id=gallery_id, user=request.user)
+def upload_destination_image(request, pk):
+    # no user filter here (Destination has no user field)
+    destination = get_object_or_404(Destination, pk=pk)
 
-    if request.method == 'POST':
-        img_form = DestinationImageForm(request.POST, request.FILES)
-        if img_form.is_valid():
-            image = img_form.save(commit=False)
-            image.destination = destination
-            image.save()
-            return redirect('destination_detail', id=destination.id)
+    if request.method == "POST":
+        form = DestinationImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            files = request.FILES.getlist("image")
+            if not files:
+                messages.error(request, "Please choose at least one image.")
+            else:
+                for f in files:
+                    DestinationImage.objects.create(destination=destination, image=f)
+                messages.success(request, f"Uploaded {len(files)} image(s).")
+                return redirect("destination_detail", pk=destination.pk)
     else:
-        img_form = DestinationImageForm()
+        form = DestinationImageForm()
+
+    return render(
+        request,
+        "tour/upload_destination_image.html",
+        {"form": form, "destination": destination},
+    )
+
+
+# @login_required
+# def upload_destination_image(request, gallery_id):
+#     destination = get_object_or_404(Destination, id=gallery_id, user=request.user)
+
+#     if request.method == 'POST':
+#         img_form = DestinationImageForm(request.POST, request.FILES)
+#         if img_form.is_valid():
+#             image = img_form.save(commit=False)
+#             image.destination = destination
+#             image.save()
+#             return redirect('destination_detail', id=destination.id)
+#     else:
+#         img_form = DestinationImageForm()
     
-    return render(request, 'tour/upload_destination_image.html', {'form': img_form, 'destination': destination})
+#     return render(request, 'tour/upload_destination_image.html', {'form': img_form, 'destination': destination})
 
 
 
