@@ -1,0 +1,121 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Booking Details</h1>
+
+    <h3>Client: {{ booking.client.name }}</h3>
+    <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+    <p><strong>End Date:</strong> {{ booking.end_date }}</p>
+
+<a href="{% url 'add_destination' booking.pk %}" class="btn btn-primary mb-3">
+    ➕ Add Destination
+</a>
+
+    <hr>
+    <h4>Cost Breakdown</h4>
+    {% with breakdown=booking.cost_breakdown %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="text-end">Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Accommodation</td>
+                    <td class="text-end">${{ breakdown.Accommodation }}</td>
+                </tr>
+                <tr>
+                    <td>Activities</td>
+                    <td class="text-end">${{ breakdown.Activities }}</td>
+                </tr>
+                <tr>
+                    <td>Dining</td>
+                    <td class="text-end">${{ breakdown.Dining }}</td>
+                </tr>
+                <tr>
+                    <td>Transport</td>
+                    <td class="text-end">${{ breakdown.Transport }}</td>
+                </tr>
+                <tr class="fw-bold">
+                    <td>Total</td>
+                    <td class="text-end">${{ breakdown.Total }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endwith %}
+
+
+    <hr>
+<h4>Travel Itinerary</h4>
+<table class="table table-striped table-sm">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Mode</th>
+      <th>From</th>
+      <th>To</th>
+      <th class="text-end">Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for leg in travel_legs %}
+      <tr>
+        <td>{{ leg.date }}</td>
+        <td>{{ leg.mode }}</td>
+        <td>
+          {{ leg.from_location }}
+          {% if leg.from_destination %} ({{ leg.from_destination.name }}){% endif %}
+        </td>
+        <td>
+          {{ leg.to_location }}
+          {% if leg.to_destination %} ({{ leg.to_destination.name }}){% endif %}
+        </td>
+        <td class="text-end">${{ leg.cost }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="5" class="text-center text-muted">No travel legs added yet.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  {% if travel_legs %}
+  <tfoot>
+    <tr class="fw-bold">
+      <td colspan="4" class="text-end">Total Transport</td>
+      <td class="text-end">${{ travel_summary.total }}</td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+
+{% if travel_legs %}
+<div class="row">
+  <div class="col-md-6">
+    <h6 class="mb-2">Summary</h6>
+    <ul class="list-unstyled small">
+      <li>Number of legs: <strong>{{ travel_summary.count }}</strong></li>
+      <li>Total transport cost: <strong>${{ travel_summary.total }}</strong></li>
+    </ul>
+  </div>
+  <div class="col-md-6">
+    <h6 class="mb-2">Cost by Mode</h6>
+    <ul class="list-unstyled small">
+      {% for mode, cost in travel_summary.by_mode.items %}
+        <li>{{ mode }}: <strong>${{ cost }}</strong></li>
+      {% empty %}
+        <li class="text-muted">No modes yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+
+    <a href="{% url 'booking_list' %}" class="btn btn-secondary mt-3">Back to Bookings</a>
+    <a href="{% url 'booking_pdf' booking.pk %}" class="btn btn-success mt-3" target="_blank">
+    📄 Download PDF
+</a>
+
+</div>
+{% endblock %}

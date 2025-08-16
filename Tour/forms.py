@@ -105,7 +105,7 @@ class DiningExpenseForm(forms.ModelForm):
 class RestaurantForm(forms.ModelForm):
     class Meta:
         model = Restaurant
-        fields = ["destination", "name"]
+        fields = ["destination", "name", "image", "description"]
 
 
 class TravelLegForm(forms.ModelForm):

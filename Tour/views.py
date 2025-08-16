@@ -8,7 +8,13 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
 from django.utils.decorators import method_decorator
 from django.db.models import Q, Prefetch
-
+from decimal import Decimal
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 
 
@@ -142,6 +148,8 @@ class BookingCreateView(CreateView):
         return reverse("booking_detail", kwargs={"pk": self.object.pk})
 
 
+
+
 @method_decorator(login_required, name="dispatch")
 class BookingDetailView(DetailView):
     model = Booking
@@ -161,10 +169,28 @@ class BookingDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         booking: Booking = ctx["booking"]
+
+        # existing
         ctx["costs"] = booking.cost_breakdown()
         ctx["destinations"] = booking.destinations.all().order_by("start_date")
-        return ctx
 
+        # NEW: ordered legs + summary
+        legs = booking.travel_legs.all().select_related(
+            "from_destination", "to_destination"
+        ).order_by("date", "id")
+
+        total_transport = sum((leg.cost or Decimal("0.00")) for leg in legs)
+        by_mode = {}
+        for leg in legs:
+            by_mode[leg.mode] = by_mode.get(leg.mode, Decimal("0.00")) + (leg.cost or Decimal("0.00"))
+
+        ctx["travel_legs"] = legs
+        ctx["travel_summary"] = {
+            "count": legs.count(),
+            "total": total_transport,
+            "by_mode": by_mode,  # dict like {"Flight": 123.45, ...}
+        }
+        return ctx
 
 # ---------- Destination pages ----------
 @method_decorator(login_required, name="dispatch")
@@ -273,30 +299,7 @@ def delete_destination(request, id):
 
 # ---------- Upload/Add child records (aligned to current models) ----------
 
-# @login_required
-# def upload_destination_image(request, pk):
-#     # no user filter here (Destination has no user field)
-#     destination = get_object_or_404(Destination, pk=pk)
 
-#     if request.method == "POST":
-#         form = DestinationImageForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             files = request.FILES.getlist("image")
-#             if not files:
-#                 messages.error(request, "Please choose at least one image.")
-#             else:
-#                 for f in files:
-#                     DestinationImage.objects.create(destination=destination, image=f)
-#                 messages.success(request, f"Uploaded {len(files)} image(s).")
-#                 return redirect("destination_detail", pk=destination.pk)
-#     else:
-#         form = DestinationImageForm()
-
-#     return render(
-#         request,
-#         "tour/upload_destination_image.html",
-#         {"form": form, "destination": destination},
-#     )
 
 @login_required
 def upload_destination_image(request, pk):
@@ -375,7 +378,7 @@ def upload_dining_expense(request, destination_id):
 def upload_restaurant(request, destination_id):
     destination = get_object_or_404(Destination, id=destination_id)
     if request.method == "POST":
-        form = RestaurantForm(request.POST)
+        form = RestaurantForm(request.POST, request.FILES)
         if form.is_valid():
             r = form.save(commit=False)
             r.destination = destination
@@ -408,3 +411,358 @@ def upload_travel_leg(request, booking_id):
         form.fields["to_destination"].queryset = booking.destinations.all()
 
     return render(request, "tour/upload_travel_leg.html", {"form": form, "title": "Add Travel Leg", "booking": booking})
+
+
+
+
+
+
+# print
+
+
+# views.py
+# from decimal import Decimal
+# from django.shortcuts import get_object_or_404
+# from django.http import HttpResponse
+# from django.template.loader import render_to_string
+# from django.contrib.auth.decorators import login_required
+# from django.db.models import Prefetch
+
+# from .models import Booking, Destination, TravelLeg
+
+# from django.http import HttpResponse
+# from django.shortcuts import get_object_or_404
+# from reportlab.lib.pagesizes import A4
+# from reportlab.pdfgen import canvas
+# from .models import Booking
+# from reportlab.platypus import (
+#     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
+# )
+# from reportlab.lib.pagesizes import A4
+# from reportlab.lib import colors
+# from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+# from django.http import HttpResponse
+# from django.shortcuts import get_object_or_404
+# from django.contrib.auth.decorators import login_required
+# from django.conf import settings
+# import os
+
+# from .models import Booking  # adjust to your app structure
+
+
+# @login_required
+# def booking_pdf(request, pk):
+#     booking = get_object_or_404(Booking, pk=pk)
+
+#     # Prepare PDF response
+#     response = HttpResponse(content_type="application/pdf")
+#     response["Content-Disposition"] = f'attachment; filename="booking_{pk}.pdf"'
+
+#     # Document setup
+#     doc = SimpleDocTemplate(
+#         response,
+#         pagesize=A4,
+#         rightMargin=5,
+#         leftMargin=5,
+#         topMargin=30,
+#         bottomMargin=30,
+#     )
+#     styles = getSampleStyleSheet()
+#     styles.add(ParagraphStyle(name="CenterTitle", fontSize=16, alignment=1, spaceAfter=50))
+#     styles.add(ParagraphStyle(name="TableHeading", fontSize=12, spaceAfter=50, textColor=colors.HexColor("#333333")))
+
+#     elements = []
+
+#     # Header
+#     elements.append(Paragraph("Travel Management System", styles["Title"]))
+#     elements.append(Paragraph(f"Booking Report - {booking.client.name}", styles["CenterTitle"]))
+#     elements.append(Spacer(1, 12))
+
+#     # ---------- LEFT (Summary) ----------
+#     left_content = []
+
+#     # Booking Info
+#     info_data = [
+#         ["Client:", booking.client.name],
+#         ["Start Date:", str(booking.start_date)],
+#         ["End Date:", str(booking.end_date)],
+#     ]
+#     info_table = Table(info_data, colWidths=[100, 200])
+#     info_table.setStyle(TableStyle([
+#         ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
+#         ("BOX", (0, 0), (-1, -1), 1, colors.grey),
+#         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+#         ("FONTSIZE", (0, 0), (-1, -1), 9),
+#     ]))
+#     left_content.append(Paragraph("Booking Info", styles["TableHeading"]))
+#     left_content.append(info_table)
+#     left_content.append(Spacer(1, 12))
+
+#     # Cost Breakdown
+#     breakdown = booking.cost_breakdown()
+#     cost_data = [["Category", "Cost ($)"]]
+#     for k, v in breakdown.items():
+#         cost_data.append([k, f"{v:.2f}"])
+#     cost_table = Table(cost_data, colWidths=[120, 150])
+#     cost_table.setStyle(TableStyle([
+#         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#007ACC")),
+#         ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+#         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+#         ("FONTSIZE", (0, 0), (-1, -1), 9),
+#     ]))
+#     left_content.append(Paragraph("Cost Breakdown", styles["TableHeading"]))
+#     left_content.append(cost_table)
+#     left_content.append(Spacer(1, 12))
+
+#     # Travel Itinerary
+#     legs = booking.travel_legs.all()
+#     if legs:
+#         travel_data = [["Date", "Mode", "From", "To", "Cost ($)"]]
+#         for leg in legs:
+#             travel_data.append([
+#                 str(leg.date),
+#                 leg.mode,
+#                 str(leg.from_destination or leg.from_location),
+#                 str(leg.to_destination or leg.to_location),
+#                 f"{leg.cost:.2f}",
+#             ])
+#         travel_table = Table(travel_data, colWidths=[55, 60, 90, 90, 65])
+#         travel_table.setStyle(TableStyle([
+#             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#444444")),
+#             ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+#             ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+#             ("FONTSIZE", (0, 0), (-1, -1), 8),
+#             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
+#         ]))
+#         left_content.append(Paragraph("Travel Itinerary", styles["TableHeading"]))
+#         left_content.append(travel_table)
+
+#     # ---------- RIGHT (Images) ----------
+#     right_content = []
+
+#     # Destinations
+#     right_content.append(Paragraph("Destinations", styles["TableHeading"]))
+#     for d in booking.destinations.all():
+#         right_content.append(Paragraph(f"<b>{d.name}</b>", styles["Normal"]))
+
+#         imgs = []
+#         row = []
+#         for g in d.galleries.all()[:4]:  # up to 4 per destination
+#             if g.image and os.path.exists(g.image.path):
+#                 try:
+#                     img = RLImage(g.image.path, width=120, height=90)
+#                     row.append(img)
+#                     if len(row) == 2:
+#                         imgs.append(row)
+#                         row = []
+#                 except Exception:
+#                     pass
+#         if row:
+#             imgs.append(row)
+
+#         if imgs:
+#             img_table = Table(imgs, hAlign="LEFT", colWidths=[130, 130])
+#             img_table.setStyle(TableStyle([
+#                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+#                 ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+#             ]))
+#             right_content.append(img_table)
+
+#         right_content.append(Spacer(1, 10))
+
+#     # Restaurants
+#     right_content.append(Paragraph("Restaurants", styles["TableHeading"]))
+#     for d in booking.destinations.all():
+#         for r in d.restaurants.all():
+#             right_content.append(Paragraph(r.name, styles["Normal"]))
+#             if r.image and os.path.exists(r.image.path):
+#                 try:
+#                     img = RLImage(r.image.path, width=120, height=90)
+#                     img_table = Table([[img]], hAlign="LEFT", colWidths=[130])
+#                     img_table.setStyle(TableStyle([
+#                         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+#                         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+#                     ]))
+#                     right_content.append(img_table)
+#                 except Exception:
+#                     pass
+#             right_content.append(Spacer(1, 8))
+
+
+#     main_table = Table(
+#         [[left_content, right_content]],
+#         colWidths=[280, 240],
+#         hAlign="CENTER",
+#     )
+#     main_table.setStyle(TableStyle([
+#         ("VALIGN", (0, 0), (-1, -1), "TOP"),
+#         ("LEFTPADDING", (0, 0), (-1, -1), 6),
+#         ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+#     ]))
+#     elements.append(main_table)
+
+#     # Footer
+#     elements.append(Spacer(1, 20))
+#     elements.append(Paragraph("Generated by TMS © 2023", styles["Normal"]))
+
+#     # Build PDF
+#     doc.build(elements)
+#     return response
+
+# views.py
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+    Image as RLImage, PageBreak
+)
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+import os
+
+from .models import Booking
+
+
+@login_required
+def booking_pdf(request, pk):
+    booking = get_object_or_404(Booking, pk=pk)
+
+    # PDF Response
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="booking_{pk}.pdf"'
+
+    # Document setup
+    doc = SimpleDocTemplate(
+        response,
+        pagesize=A4,
+        rightMargin=40,
+        leftMargin=40,
+        topMargin=40,
+        bottomMargin=40,
+    )
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name="CenterTitle", fontSize=18, alignment=1, spaceAfter=20, textColor=colors.HexColor("#0056A6")))
+    styles.add(ParagraphStyle(name="SectionHeading", fontSize=13, spaceBefore=15, spaceAfter=10, textColor=colors.HexColor("#333333"), underlineWidth=0.5))
+    styles.add(ParagraphStyle(name="NormalText", fontSize=10, leading=14, spaceAfter=6))
+
+    elements = []
+
+    # ---------------- HEADER ----------------
+    elements.append(Paragraph("Travel Management System", styles["Title"]))
+    elements.append(Paragraph(f"Booking Report", styles["CenterTitle"]))
+    elements.append(Paragraph(f"Client: <b>{booking.client.name}</b>", styles["NormalText"]))
+    elements.append(Spacer(1, 12))
+
+    # ---------------- SUMMARY ----------------
+    # Booking Info
+    info_data = [
+        ["Client:", booking.client.name],
+        ["Start Date:", str(booking.start_date)],
+        ["End Date:", str(booking.end_date)],
+    ]
+    info_table = Table(info_data, colWidths=[120, 300])
+    info_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.grey),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+    ]))
+    elements.append(Paragraph("Booking Information", styles["SectionHeading"]))
+    elements.append(info_table)
+    elements.append(Spacer(1, 15))
+
+    # Cost Breakdown
+    breakdown = booking.cost_breakdown()
+    cost_data = [["Category", "Cost ($)"]]
+    for k, v in breakdown.items():
+        cost_data.append([k, f"{v:.2f}"])
+    cost_table = Table(cost_data, colWidths=[200, 150])
+    cost_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0056A6")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+        ("ALIGN", (1, 1), (-1, -1), "RIGHT"),
+        ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+    ]))
+    elements.append(Paragraph("Cost Breakdown", styles["SectionHeading"]))
+    elements.append(cost_table)
+    elements.append(Spacer(1, 15))
+
+    # Travel Itinerary
+    legs = booking.travel_legs.all()
+    if legs:
+        travel_data = [["Date", "Mode", "From", "To", "Cost ($)"]]
+        for leg in legs:
+            travel_data.append([
+                str(leg.date),
+                leg.mode,
+                str(leg.from_destination or leg.from_location),
+                str(leg.to_destination or leg.to_location),
+                f"{leg.cost:.2f}",
+            ])
+        travel_table = Table(travel_data, colWidths=[70, 70, 120, 120, 70])
+        travel_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#444444")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ]))
+        elements.append(Paragraph("Travel Itinerary", styles["SectionHeading"]))
+        elements.append(travel_table)
+        elements.append(Spacer(1, 15))
+
+    # ---------------- PAGE BREAK BEFORE IMAGES ----------------
+    elements.append(PageBreak())
+
+    # ---------------- DESTINATIONS ----------------
+    elements.append(Paragraph("Destinations", styles["SectionHeading"]))
+    for d in booking.destinations.all():
+        elements.append(Paragraph(f"<b>{d.name}</b>", styles["NormalText"]))
+        row, img_rows = [], []
+        for g in d.galleries.all()[:4]:
+            if g.image and os.path.exists(g.image.path):
+                try:
+                    row.append(RLImage(g.image.path, width=200, height=140))
+                    if len(row) == 2:
+                        img_rows.append(row)
+                        row = []
+                except Exception:
+                    pass
+        if row:
+            img_rows.append(row)
+
+        if img_rows:
+            img_table = Table(img_rows, colWidths=[220, 220], hAlign="LEFT")
+            img_table.setStyle(TableStyle([
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ]))
+            elements.append(img_table)
+        elements.append(Spacer(1, 15))
+
+    # ---------------- RESTAURANTS ----------------
+    elements.append(Paragraph("Restaurants", styles["SectionHeading"]))
+    for d in booking.destinations.all():
+        for r in d.restaurants.all():
+            elements.append(Paragraph(f"<b>{r.name}</b>", styles["NormalText"]))
+            if r.image and os.path.exists(r.image.path):
+                try:
+                    img = RLImage(r.image.path, width=200, height=140)
+                    elements.append(img)
+                except Exception:
+                    pass
+            elements.append(Spacer(1, 12))
+
+    # ---------------- FOOTER ----------------
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph("<i>Generated by Travel Management System © 2025</i>", styles["NormalText"]))
+
+    # Build PDF
+    doc.build(elements)
+    return response

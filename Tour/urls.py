@@ -35,4 +35,11 @@ urlpatterns = [
     path("destinations/<int:destination_id>/dining/new/", views.upload_dining_expense, name="upload_dining"),
     path("destinations/<int:destination_id>/restaurants/new/", views.upload_restaurant, name="upload_restaurant"),
     path("bookings/<int:booking_id>/legs/new/", views.upload_travel_leg, name="upload_travel_leg"),
+    
+    # reports
+    path("booking/<int:pk>/pdf/", views.booking_pdf, name="booking_pdf"),
+    
+    path("booking/<int:pk>/", views.BookingDetailView.as_view(), name="booking_detail"),
+    path("booking/<int:pk>/pdf/", views.booking_pdf, name="booking_pdf"),
+
 ]
