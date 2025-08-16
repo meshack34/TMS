@@ -1,0 +1,86 @@
+{# tour/templates/tour/client_summary.html #}
+{% extends "main.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/report.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="report-container">
+  <h1>Accommodation Summary</h1>
+  <p>Period:
+    {% if start_date %} {{ start_date }} {% endif %}
+    {% if end_date %} - {{ end_date }} {% endif %}
+  </p>
+
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>Start</th><th>End</th><th>Destination</th><th>Room</th><th>Basis</th><th>Nights</th><th>Cost</th><th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in accommodation %}
+      <tr>
+        <td>{{ item.start_date|nice_date }}</td>
+        <td>{{ item.end_date|nice_date }}</td>
+        <td>{{ item.destination }}</td>
+        <td>{{ item.accommodation }}</td>
+        <td>{{ item.basis }}</td>
+        <td>{{ item.nights }}</td>
+        <td>KES {{ item.cost }}</td>
+        <td>KES {{ item.total_cost }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">No records</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="summary-footer">
+    <strong>Grand total:</strong> KES {{ grand_total }}
+  </div>
+
+  <h2>Transport Summary</h2>
+  <h3>Flights</h3>
+  <table class="summary-table">
+    <thead><tr><th>Date</th><th>Flight</th><th>From</th><th>To</th></tr></thead>
+    <tbody>
+      {% for f in flights %}
+      <tr>
+        <td>{{ f.date|nice_date }}</td>
+        <td>{{ f.title }}</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">No flights</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Transfers</h3>
+  <table class="summary-table">
+    <thead><tr><th>Date</th><th>Type</th><th>Pick up</th><th>Drop off</th></tr></thead>
+    <tbody>
+      {% for t in transfers %}
+      <tr>
+        <td>{{ t.date|nice_date }}</td>
+        <td>Transfer</td>
+        <td>{{ t.title }}</td>
+        <td>—</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">No transfers</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="actions">
+    <a class="btn btn-outline-primary" href="{% url 'export_summary_pdf' %}?start_date={{ start_date }}&end_date={{ end_date }}">Export PDF</a>
+    <a class="btn btn-outline-secondary" href="{% url 'export_summary_excel' %}?start_date={{ start_date }}&end_date={{ end_date }}">Export Excel</a>
+  </div>
+</div>
+{% endblock %}

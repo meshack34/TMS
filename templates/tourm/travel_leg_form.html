@@ -1,0 +1,45 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Add Travel Leg</h2>
+
+<form method="post" id="leg-form">
+  {% csrf_token %}
+  <table>
+    {{ form.as_table }}
+  </table>
+
+  <button type="submit">Save leg</button>
+  <a href="{% url 'travel_leg_list' %}">Back to legs</a>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Auto fill pick_up when from_destination changes
+  const fromSelect = document.querySelector('select[name="from_destination"]');
+  const toSelect = document.querySelector('select[name="to_destination"]');
+  const pickUpInput = document.querySelector('input[name="pick_up"]');
+  const dropOffInput = document.querySelector('input[name="drop_off"]');
+
+  if (fromSelect) {
+    fromSelect.addEventListener('change', function () {
+      const selected = fromSelect.options[fromSelect.selectedIndex].text;
+      if (selected && (!pickUpInput.value || pickUpInput.value.trim() === '')) {
+        pickUpInput.value = selected;
+      }
+    });
+  }
+
+  if (toSelect) {
+    toSelect.addEventListener('change', function () {
+      const selected = toSelect.options[toSelect.selectedIndex].text;
+      if (selected && (!dropOffInput.value || dropOffInput.value.trim() === '')) {
+        dropOffInput.value = selected;
+      }
+    });
+  }
+});
+</script>
+
+{% endblock %}

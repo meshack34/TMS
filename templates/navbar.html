@@ -1,0 +1,52 @@
+<div style="
+display:grid;
+grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr ;
+background-color:lightblue;
+height :40px;
+font-weight:bold;
+font-family:Arial;
+font-size:20px;
+justify-content:space-evenly;
+align-items:center;
+">
+    <div>
+
+    <a href="{% url 'dashboard' %}">Nomad Logo </a>
+
+    </div>
+
+    
+
+    <div >
+        <a href="{% url 'booking_create' %}"> New Booking</a>
+   </div>
+    <div >
+        <a href="{% url 'client_list' %}"> Manage Bookings</a>
+    </div>
+     <div>
+        <a href="{% url 'client_create' %}"> New Itinerary</a>
+   </div>
+    <div>
+        <a href="{% url 'dashboard' %}">  Itinerary</a>
+  
+    </div>
+    <div>
+        {% comment %} <a href="{% url 'itinerary' %}">Help/Support  {% endcomment %}
+    </a>    
+    </div>
+    <div>
+    {% if request.user.is_authenticated %}
+   <a href = "{% url 'logout' %}">logout</a>   
+   {% else %}
+    <a href="{% url 'login' %}">Login 
+    </a>
+    {% endif %}
+    </div>
+</div>
+    
+    
+
+</div>
+
+    
+<hr>

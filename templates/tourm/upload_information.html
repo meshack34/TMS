@@ -1,0 +1,13 @@
+{% extends 'main.html' %}
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">Add Information for <strong>{{ destination.name }}</strong></h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-info">Save Information</button>
+    <a href="{% url 'destination_detail' destination.id %}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

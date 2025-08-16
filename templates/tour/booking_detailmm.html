@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container my-4">
+  <h2>Booking #{{ booking.id }}</h2>
+  <p><strong>Dates:</strong> {{ booking.start_date }} – {{ booking.end_date }}</p>
+  <p><strong>Total Cost:</strong> ${{ booking.total_cost }}</p>
+
+  <hr>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Destinations</h4>
+    <div class="mb-3">
+    <a href="{% url 'destination_add' booking.id %}" class="btn btn-success">
+        ➕ Add Destination
+    </a>
+</div>
+
+  {% if destinations %}
+    <ul class="list-group">
+      {% for destination in destinations %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ destination.name }} ({{ destination.country }})</span>
+          <a href="{% url 'destination_detail' destination.id %}" class="btn btn-sm btn-primary">View</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No destinations added yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

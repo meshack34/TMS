@@ -1,0 +1,51 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Booking Details</h1>
+
+    <h3>Client: {{ booking.client.name }}</h3>
+    <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+    <p><strong>End Date:</strong> {{ booking.end_date }}</p>
+
+<a href="{% url 'add_destination' booking.pk %}" class="btn btn-primary mb-3">
+    ➕ Add Destination
+</a>
+
+    <hr>
+    <h4>Cost Breakdown</h4>
+    {% with breakdown=booking.cost_breakdown %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="text-end">Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Accommodation</td>
+                    <td class="text-end">${{ breakdown.Accommodation }}</td>
+                </tr>
+                <tr>
+                    <td>Activities</td>
+                    <td class="text-end">${{ breakdown.Activities }}</td>
+                </tr>
+                <tr>
+                    <td>Dining</td>
+                    <td class="text-end">${{ breakdown.Dining }}</td>
+                </tr>
+                <tr>
+                    <td>Transport</td>
+                    <td class="text-end">${{ breakdown.Transport }}</td>
+                </tr>
+                <tr class="fw-bold">
+                    <td>Total</td>
+                    <td class="text-end">${{ breakdown.Total }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endwith %}
+
+    <a href="{% url 'booking_list' %}" class="btn btn-secondary mt-3">Back to Bookings</a>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<h2>Accommodation Summary</h2>
+
+<form method="get" class="mb-4">
+    <label>Start Date:
+        <input type="date" name="start_date" value="{{ start_date }}">
+    </label>
+    <label>End Date:
+        <input type="date" name="end_date" value="{{ end_date }}">
+    </label>
+    <button type="submit">Filter</button>
+</form>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Start</th>
+            <th>End</th>
+            <th>Destination</th>
+            <th>Room</th>
+            <th>Basis</th>
+            <th>Nights</th>
+            <th>Cost (KSh)</th>
+            <th>Total Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in summary %}
+        <tr>
+            <td>{{ item.start_date }}</td>
+            <td>{{ item.end_date }}</td>
+            <td>{{ item.destination }}</td>
+            <td>{{ item.accommodation }}</td>
+            <td>{{ item.basis }}</td>
+            <td>{{ item.nights }}</td>
+            <td>{{ item.cost }}</td>
+            <td>{{ item.total_cost }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Grand Total: KSh {{ grand_total }}</h3>
+
+<a href="{% url 'export_summary_excel' %}?start_date={{ start_date }}&end_date={{ end_date }}">Export to Excel</a> |
+<a href="{% url 'export_summary_pdf' %}?start_date={{ start_date }}&end_date={{ end_date }}">Export to PDF</a>
+
+{% endblock %}

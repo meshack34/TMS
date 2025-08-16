@@ -1,0 +1,191 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% if booking %}Edit{% else %}New{% endif %} Booking</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 20px; }
+    h2 { margin-top: 1.2rem; }
+    fieldset { border: 1px solid #ddd; padding: 1rem; margin-bottom: 1.2rem; }
+    legend { font-weight: 600; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .row { margin-bottom: .6rem; }
+    .totals { background: #fafafa; border: 1px solid #eee; padding: 1rem; }
+    .errorlist { color: #b00020; margin: 0 0 .6rem 0; }
+    .actions { display: flex; gap: .6rem; }
+    button { padding: .6rem 1rem; }
+  </style>
+</head>
+<body>
+
+  <h1>{% if booking %}Edit Booking #{{ booking.id }}{% else %}New Booking{% endif %}</h1>
+
+  {% if messages %}
+    <ul>
+      {% for m in messages %}
+        <li>{{ m }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <fieldset>
+      <legend>Booking</legend>
+      <div class="grid">
+        {{ booking_form.as_p }}
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Destinations</legend>
+      {{ dest_formset.management_form }}
+      {% for form in dest_formset.forms %}
+        <div class="grid" style="border: 1px dashed #ddd; padding: .8rem; margin-bottom:.6rem;">
+          {{ form.non_field_errors }}
+          {{ form.as_p }}
+          {% if form.instance.pk %}
+            <p><small>ID: {{ form.instance.pk }}</small></p>
+          {% endif %}
+          {% if dest_formset.can_delete %}
+            <div class="row">{{ form.DELETE }} <label>Delete</label></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <div class="row"><button type="button" onclick="addForm('dest')">+ Add Destination</button></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Activities</legend>
+      {{ activity_formset.management_form }}
+      {% for form in activity_formset.forms %}
+        <div style="border: 1px dashed #ddd; padding: .8rem; margin-bottom:.6rem;">
+          {{ form.non_field_errors }}
+          <div class="grid">{{ form.as_p }}</div>
+          {% if activity_formset.can_delete %}
+            <div class="row">{{ form.DELETE }} <label>Delete</label></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <div class="row"><button type="button" onclick="addForm('act')">+ Add Activity</button></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Accommodation (Stays)</legend>
+      {{ stay_formset.management_form }}
+      {% for form in stay_formset.forms %}
+        <div style="border: 1px dashed #ddd; padding: .8rem; margin-bottom:.6rem;">
+          {{ form.non_field_errors }}
+          <div class="grid">{{ form.as_p }}</div>
+          {% if stay_formset.can_delete %}
+            <div class="row">{{ form.DELETE }} <label>Delete</label></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <div class="row"><button type="button" onclick="addForm('stay')">+ Add Stay</button></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Dining Expenses</legend>
+      {{ dining_formset.management_form }}
+      {% for form in dining_formset.forms %}
+        <div style="border: 1px dashed #ddd; padding: .8rem; margin-bottom:.6rem;">
+          {{ form.non_field_errors }}
+          <div class="grid">{{ form.as_p }}</div>
+          {% if dining_formset.can_delete %}
+            <div class="row">{{ form.DELETE }} <label>Delete</label></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <div class="row"><button type="button" onclick="addForm('dine')">+ Add Dining Expense</button></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Travel Legs</legend>
+      {{ travel_formset.management_form }}
+      {% for form in travel_formset.forms %}
+        <div style="border: 1px dashed #ddd; padding: .8rem; margin-bottom:.6rem;">
+          {{ form.non_field_errors }}
+          <div class="grid">{{ form.as_p }}</div>
+          {% if travel_formset.can_delete %}
+            <div class="row">{{ form.DELETE }} <label>Delete</label></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <div class="row"><button type="button" onclick="addForm('travel')">+ Add Travel Leg</button></div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit">Save Booking</button>
+      {% if booking %}
+        <a href="{% url 'planner' booking.id %}">Refresh</a>
+      {% endif %}
+    </div>
+
+  </form>
+
+  {% if totals %}
+    <h2>Cost Summary</h2>
+    <div class="totals">
+      <p><strong>Accommodation:</strong> {{ totals.accommodation }}</p>
+      <p><strong>Activities:</strong> {{ totals.activities }}</p>
+      <p><strong>Dining:</strong> {{ totals.dining }}</p>
+      <p><strong>Transport:</strong> {{ totals.transport }}</p>
+      <hr>
+      <p><strong>Subtotal:</strong> {{ totals.subtotal }}</p>
+      <p><strong>Grand Total:</strong> {{ totals.grand_total }}</p>
+    </div>
+  {% endif %}
+
+  <script>
+    // Generic formset row adder (uses empty-form convention)
+    function addForm(prefix) {
+      const mgmtTotal = document.querySelector(`#id_${prefix}-TOTAL_FORMS`);
+      if (!mgmtTotal) return;
+
+      const total = parseInt(mgmtTotal.value, 10);
+      const container = document.querySelector(`[name="${prefix}-formset-container"]`) || document.body;
+
+      // Find the last form block under this prefix by looking for fields starting with id_{prefix}-{index}-
+      // Simpler approach: clone the last occurrence of this prefix block
+      const management = document.querySelectorAll(`[name="${prefix}-form"]`);
+      const blocks = document.querySelectorAll(`[data-prefix="${prefix}"]`);
+      let cloneSource = blocks.length ? blocks[blocks.length - 1] : null;
+
+      // Fallback: try to find any dashed block from the section
+      const section = document.querySelector(`fieldset:has(#id_${prefix}-TOTAL_FORMS)`);
+      if (!cloneSource && section) {
+        const candidates = section.querySelectorAll('div[style*="dashed"]');
+        if (candidates.length) cloneSource = candidates[candidates.length - 1];
+      }
+      if (!cloneSource) return;
+
+      const clone = cloneSource.cloneNode(true);
+      const html = clone.innerHTML;
+      const regex = new RegExp(`${prefix}-(\\d+)-`, 'g');
+      const updated = html.replace(regex, `${prefix}-${total}-`);
+      clone.innerHTML = updated;
+
+      // Clear input values
+      clone.querySelectorAll('input').forEach(inp => {
+        if (inp.type === 'checkbox') { inp.checked = false; }
+        else if (inp.type === 'date' || inp.type === 'time' || inp.type === 'number' || inp.type === 'text') {
+          inp.value = '';
+        }
+      });
+      clone.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+
+      // Tag it for next time
+      clone.setAttribute('data-prefix', prefix);
+
+      // Insert before the "Add" button in this section
+      section.querySelector('div.row:last-of-type').before(clone);
+
+      mgmtTotal.value = total + 1;
+    }
+  </script>
+
+</body>
+</html>

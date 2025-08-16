@@ -1,0 +1,33 @@
+{% extends "main.html" %}
+{% block content %}
+<h2 class="mb-4">Welcome, {{ user.username }} 👋</h2>
+
+<a href="{% url 'add_destination' %}" class="btn btn-success mb-3">Add New Destination</a>
+
+<div class="row">
+  {% for dest in destinations %}
+    <div class="col-md-4 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ dest.name }}</h5>
+          <p class="card-text">{{ dest.country }}<br>
+          {{ dest.start_date }} → {{ dest.end_date }}</p>
+          <a href="{% url 'destination_detail' dest.id %}" class="btn btn-outline-primary">View</a>
+        
+        <a href="{% url 'edit_destination' dest.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+        <a href="{% url 'delete_destination' dest.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+        <a href="{% url 'upload_gallery' dest.id %}" class="btn btn-sm btn-outline-info">Add Gallery</a>
+        <a href="{% url 'upload_room' dest.id %}" class="btn btn-sm btn-outline-info">Add Room</a>
+        <a href="{% url 'upload_restaurant' dest.id %}" class="btn btn-sm btn-outline-info">Add Restaurant</a>
+   
+        <a href="{% url 'upload_activity' dest.id %}" class="btn btn-outline-success btn-sm me-2">Add Activity / Service</a>
+        <a href="{% url 'upload_information' dest.id %}" class="btn btn-outline-info btn-sm">Add Information</a>
+
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p>You haven't added any destinations yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

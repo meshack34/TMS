@@ -1,0 +1,37 @@
+{% extends "main.html" %}
+{% block content %}
+<h2>Your Itinerary / Travel Legs</h2>
+
+<p><a href="{% url 'travel_leg_create' %}">Add new leg</a> | <a href="{% url 'client_summary' %}">View summary</a></p>
+
+{% if legs %}
+  <table style="width:100%; border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>From (destination)</th>
+        <th>Pick up</th>
+        <th>To (destination)</th>
+        <th>Drop off</th>
+        <th>Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for leg in legs %}
+      <tr>
+        <td>{{ leg.date }}</td>
+        <td>{{ leg.get_booking_type_display }}</td>
+        <td>{% if leg.from_destination %}{{ leg.from_destination.name }}{% else %}-{% endif %}</td>
+        <td>{{ leg.pick_up }}</td>
+        <td>{% if leg.to_destination %}{{ leg.to_destination.name }}{% else %}-{% endif %}</td>
+        <td>{{ leg.drop_off }}</td>
+        <td>{{ leg.cost }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No travel legs yet.</p>
+{% endif %}
+{% endblock %}

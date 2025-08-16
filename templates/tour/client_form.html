@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container my-4">
+    <h2>Add Client</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'client_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

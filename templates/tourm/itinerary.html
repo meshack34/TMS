@@ -1,0 +1,38 @@
+{%extends  "main.html"%}
+
+
+    {% block content %}
+    <style>
+        .itinerary{
+            background-color:lightblue;
+            font-size:20px;
+            font-style:Arial;
+            height:500px;
+            display:grid;
+            grid-template-columns:1fr;
+
+        }
+    </style>
+
+    <div class="itinerary">
+        {%for itin in itinerary %}
+
+        <div>Full Name:{{itin.first_name }} </div>
+        <div>Location:{{itin.location }} </div>
+        <div> Activity: {{itin.activity }} </div>
+        <div> Cost: {{itin.cost }}</div>
+        <div>Date: {{itin.date}}</div>
+        <hr style="border:1px solid black;">
+       
+
+     
+
+       
+
+    {%endfor%}
+
+    </div>
+  
+  
+    {% endblock %}
+

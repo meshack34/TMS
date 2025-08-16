@@ -1,0 +1,10 @@
+{% extends "main.html" %}
+{% block content %}
+<h3 class="mb-3">Delete Destination</h3>
+<p>Are you sure you want to delete <strong>{{ destination.name }}</strong>?</p>
+<form method="post">
+  {% csrf_token %}
+  <button class="btn btn-danger">Yes, delete</button>
+  <a class="btn btn-outline-secondary" href="{% url 'destination_detail' destination.id %}">Cancel</a>
+</form>
+{% endblock %}

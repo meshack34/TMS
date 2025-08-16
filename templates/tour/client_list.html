@@ -1,0 +1,25 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container my-4">
+    <h2>Clients</h2>
+    <a href="{% url 'client_create' %}" class="btn btn-primary mb-3">Add Client</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th><th>Email</th><th>Phone</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for client in clients %}
+            <tr>
+                <td>{{ client.name }}</td>
+                <td>{{ client.email }}</td>
+                <td>{{ client.phone }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="3">No clients found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

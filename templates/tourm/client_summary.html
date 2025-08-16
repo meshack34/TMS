@@ -1,0 +1,97 @@
+{% extends "main.html" %}
+{% block content %}
+<h1>Transport Summary</h1>
+
+<h3>Flights</h3>
+<table style="width:100%; border-collapse: collapse;">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Flight</th>
+      <th>Departure</th>
+      <th>Arrival</th>
+      <th>Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if flights %}
+      {% for f in flights %}
+      <tr>
+        <td>{{ f.date }}</td>
+        <td>Flight</td>
+        <td>{{ f.pick_up }}</td>
+        <td>{{ f.drop_off }}</td>
+        <td>{{ f.cost }}</td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="5">No flights</td></tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<h3>Transfers</h3>
+<table style="width:100%; border-collapse: collapse;">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Type</th>
+      <th>Pick Up</th>
+      <th>Drop Off</th>
+      <th>Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if transfers %}
+      {% for t in transfers %}
+      <tr>
+        <td>{{ t.date }}</td>
+        <td>Transfer</td>
+        <td>{{ t.pick_up }}</td>
+        <td>{{ t.drop_off }}</td>
+        <td>{{ t.cost }}</td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="5">No transfers</td></tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<h3>Accommodation</h3>
+<table style="width:100%; border-collapse: collapse;">
+  <thead>
+    <tr>
+      <th>Start</th>
+      <th>End</th>
+      <th>Destination</th>
+      <th>Room</th>
+      <th>Basis</th>
+      <th>Nights</th>
+      <th>Cost</th>
+      <th>Total Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if accommodation %}
+      {% for a in accommodation %}
+      <tr>
+        <td>{{ a.start_date }}</td>
+        <td>{{ a.end_date }}</td>
+        <td>{{ a.destination }}</td>
+        <td>{{ a.accommodation }}</td>
+        <td>{{ a.basis }}</td>
+        <td>{{ a.nights }}</td>
+        <td>{{ a.cost }}</td>
+        <td>{{ a.total_cost }}</td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="8">No accommodation found</td></tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<h3>Grand Total: {{ grand_total }}</h3>
+
+{% endblock %}

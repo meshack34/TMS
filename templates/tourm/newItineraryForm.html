@@ -1,0 +1,39 @@
+{%extends 'main.html'%}
+{% block content %}
+<style>
+    
+      .register-form{
+          background-color:lightblue;
+      
+          border-radius:20px;
+          font-size:20px;
+          border-radius:15px;
+          
+</style>
+
+<div >
+    <form class="register-form" method="POST" action="">
+        {% csrf_token %}
+        {{form.as_p}}   
+
+        <input style="
+    background-color:white;
+    font-style:Arial;
+    font-size:20px;
+    border-radius:15px;
+    border-width:none;
+    padding:5px;
+    cursor:pointer;
+    width:250px;
+    margin-bottom:0;
+    text-align:center;
+    margin-left:130px;
+    "
+    
+         type="submit"  value="Submit"/>
+
+
+
+    </form>
+</div>
+{%endblock%}

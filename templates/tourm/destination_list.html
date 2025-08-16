@@ -1,0 +1,18 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h2>All Destinations</h2>
+<div class="row">
+  {% for dest in destinations %}
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ dest.name }}</h5>
+          <p>{{ dest.country }}</p>
+          <a href="{% url 'destination_detail' dest.id %}" class="btn btn-primary">View</a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/destinationdetails.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row">
+    <!-- LEFT SIDE: Destination Info -->
+    <div class="col-lg-4 mb-4">
+      <p class="text-muted">Accommodation</p>
+      <h1 class="display-6 fw-bold">{{ destination.name }}</h1>
+      <p class="text-uppercase text-muted">
+        {{ destination.country }} • {{ destination.start_date|date:"j M Y" }} - {{ destination.end_date|date:"j M Y" }}
+      </p>
+
+      <!-- Stay Details -->
+      <div class="d-flex align-items-start gap-3 my-4">
+        <div class="bg-primary text-white rounded-circle p-3">
+          <i class="bi bi-people-fill fs-3"></i>
+        </div>
+        <div>
+          <h5>Your Stay</h5>
+          <p>5 Nights</p>
+          <p class="text-muted">Full Board - Dinner, Bed, Breakfast and Lunch</p>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="bg-light p-3 rounded-4 shadow-sm mt-4">
+        <h5>About This Destination</h5>
+        <p>{{ destination.description }}</p>
+      </div>
+    </div>
+       
+    
+    <!-- LEFT SIDE END -->
+
+    <!-- RIGHT SIDE: Carousel and Tabs -->
+    <div class="col-lg-8">
+      <!-- Carousel -->
+      
+       
+
+      <!-- Tabs -->
+      
+               <!-- Tabs -->
+               <ul class="nav nav-tabs mb-3" id="destinationTabs" role="tablist">
+               {% for tab in tab_labels %}
+               <li class="nav-item" role="presentation">
+               <button class="nav-link {% if forloop.first %}active{% endif %}"
+               id="{{ tab|slugify }}-tab"
+               data-bs-toggle="tab"
+               data-bs-target="#{{ tab|slugify }}"
+               type="button"
+               role="tab">
+               {{ tab }}
+               </button>
+               </li>
+               {% endfor %}
+               </ul>
+
+               <!-- Tab Content -->
+               <div class="tab-content border rounded-bottom p-3 bg-white shadow-sm" id="destinationTabsContent" style="min-height: 200px;">
+               
+               <!-- GALLERY -->
+               <div class="tab-pane fade show active" id="gallery" role="tabpanel">
+               <div id="galleryCarousel" class="carousel slide mb-3 shadow-sm rounded" data-bs-ride="carousel" data-bs-interval="700">
+
+               <div class="carousel-indicators">
+               {% for image in destination.images.all %}
+               <button type="button" data-bs-target="#galleryCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
+               {% if forloop.first %}class="active"{% endif %} aria-current="true" aria-label="Slide {{ forloop.counter }}">
+               </button>
+               {% endfor %}
+               </div>
+
+               <div class="carousel-inner rounded-4 overflow-hidden" style="max-height: 300px;">
+               {% for image in destination.images.all %}
+               <div class="carousel-item {% if forloop.first %}active{% endif %}">
+               <img src="{{ image.image.url }}" class="d-block w-100 object-fit-cover" alt="Gallery image" style="height: 300px;">
+               </div>
+               {% endfor %}
+               </div>
+
+                              <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
+                              <span class="carousel-control-prev-icon"></span>
+                              </button>
+                              <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
+                              <span class="carousel-control-next-icon"></span>
+                              </button>
+               </div>
+               </div>
+
+               <!-- ROOMS -->
+               ...
+
+
+        <!-- ROOMS -->
+        <div class="tab-pane fade" id="rooms" role="tabpanel">
+          <div class="row">
+            {% for room in destination.rooms.all %}
+            <div class="col-md-6 mb-3">
+              <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                <img src="{{ room.image.url }}" class="card-img-top" alt="{{ room.name }}" style="height: 180px; object-fit: cover;">
+                <div class="card-body">
+                  <h6 class="card-title">{{ room.name }}</h6>
+                  <p class="card-text small">{{ room.description }}</p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- RESTAURANTS -->
+        <div class="tab-pane fade" id="restaurants" role="tabpanel">
+          <div class="row">
+            {% for r in destination.restaurants.all %}
+            <div class="col-md-6 mb-3">
+              <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                <img src="{{ r.image.url }}" class="card-img-top" alt="{{ r.name }}" style="height: 180px; object-fit: cover;">
+                <div class="card-body">
+                  <h6 class="card-title">{{ r.name }}</h6>
+                  <p class="card-text small">{{ r.description }}</p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- ACTIVITIES AND SERVICES -->
+
+        <!-- ACTIVITIES AND SERVICES -->
+<div class="tab-pane fade" id="activities-and-services" role="tabpanel">
+  <div class="timeline">
+    {% for day in itinerary_days %}
+      {% if day.activities %}
+        {% for activity in day.activities %}
+          <div class="timeline-item d-flex">
+            <div class="timeline-icon rounded-circle bg-primary text-white text-center p-2 me-3" style="width: 40px; height: 40px;">
+              <i class="bi bi-calendar-event"></i>
+            </div>
+            <div class="timeline-content mb-4 flex-grow-1 border-bottom pb-3">
+              <h6 class="mb-1">{{ activity.title }}</h6>
+              <p class="text-muted small mb-1">{{ activity.date }}</p>
+
+              <p class="text-muted small mb-1">
+      {{ activity.date }} | {{ activity.start_time|time:"g:i A" }} - {{ activity.end_time|time:"g:i A" }}
+               </p>
+              <p class="small">{{ activity.description }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="timeline-item d-flex">
+          <div class="timeline-icon rounded-circle bg-secondary text-white text-center p-2 me-3" style="width: 40px; height: 40px;">
+            <i class="bi bi-calendar-x"></i>
+          </div>
+          <div class="timeline-content mb-4 flex-grow-1 border-bottom pb-3">
+            <h6 class="mb-1">{{ day.date }}</h6>
+            <p class="text-muted small">No activities scheduled for this day.</p>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+
+      <!-- ACTIVITIES AND SERVICES -->
+        {% comment %} <div class="tab-pane fade" id="activities-and-services" role="tabpanel">
+          <div class="accordion" id="activitiesAccordion">
+  {% for day in itinerary_days %}
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">
+          {{ day.date }}
+        </button>
+      </h2>
+      <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#activitiesAccordion">
+        <div class="accordion-body">
+          {% if day.activities %}
+            <ul>
+              {% for activity in day.activities %}
+                <li><strong>{{ activity.title }}</strong>: {{ activity.description }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No activities scheduled for this day.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+        </div> {% endcomment %}
+
+
+
+
+        <!-- INFORMATION -->
+        <div class="tab-pane fade" id="information" role="tabpanel">
+          {% for info in destination.info.all %}
+          <p class="small text-muted">{{ info.content }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- MAP -->
+               <div class="tab-pane fade" id="map" role="tabpanel">
+               <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm">
+               {{ destination.map_embed_code|safe }}
+               </div>
+               </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
