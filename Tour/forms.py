@@ -26,7 +26,7 @@ class PlannerCreationForm(UserCreationForm):
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ["name", "email", "phone"]
+        fields = ["first_name", "last_name", "email", "phone", "address", "notes"]
 
 
 class DestinationForm(forms.ModelForm):
