@@ -1,0 +1,61 @@
+{% extends "base_dashboard.html" %}
+{% block content %}
+<h2 class="mb-4">Welcome, {{ user.username }} 👋</h2>
+
+{% if bookings %}
+  {% for b in bookings %}
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0">
+              Booking #{{ b.id }} — {{ b.client.name }}
+            </h5>
+            <small class="text-muted">
+              {{ b.start_date }} → {{ b.end_date }}
+            </small>
+          </div>
+          <div>
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'booking_detail' b.id %}">View Booking</a>
+            <a class="btn btn-success btn-sm" href="{% url 'add_destination' b.id %}">Add Destination</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'upload_travel_leg' b.id %}">Add Travel Leg</a>
+          </div>
+        </div>
+
+        {% if b.destinations.all %}
+          <hr>
+          <div class="row">
+            {% for dest in b.destinations.all %}
+              <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ dest.name }}</h5>
+                    <p class="card-text">
+                      {{ dest.country }}<br>
+                      {{ dest.start_date }} → {{ dest.end_date }}
+                    </p>
+                    <a href="{% url 'destination_detail' dest.id %}" class="btn btn-outline-primary btn-sm">View</a>
+                    <a href="{% url 'edit_destination' dest.id %}" class="btn btn-outline-secondary btn-sm">Edit</a>
+                    <a href="{% url 'delete_destination' dest.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+
+                    <hr class="my-2">
+                    <div class="d-flex flex-wrap gap-2">
+                      <a href="{% url 'upload_stay' dest.id %}" class="btn btn-outline-success btn-sm">Add Stay</a>
+                      <a href="{% url 'upload_activity' dest.id %}" class="btn btn-outline-success btn-sm">Add Activity</a>
+                      <a href="{% url 'upload_dining' dest.id %}" class="btn btn-outline-success btn-sm">Add Dining</a>
+                      <a href="{% url 'upload_restaurant' dest.id %}" class="btn btn-outline-info btn-sm">Add Restaurant</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <p>You don’t have any bookings yet.</p>
+  <a href="{% url 'booking_create' %}" class="btn btn-primary">Create a Booking</a>
+{% endif %}
+{% endblock %}

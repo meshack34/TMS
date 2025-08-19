@@ -1,0 +1,78 @@
+{% extends 'base_dashboard.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h2 class="mb-4">👤 My Profile</h2>
+
+  <div class="row">
+    <!-- Left column: Profile card -->
+    <div class="col-md-4">
+      <div class="card shadow-lg border-0">
+        <div class="card-body text-center">
+          {% if profile.profile_picture %}
+            <img src="{{ profile.profile_picture.url }}" class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
+          {% else %}
+            <img src="{% static 'images/default-avatar.png' %}" class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
+          {% endif %}
+          <h4>{{ request.user.username }}</h4>
+          <p class="text-muted">{{ request.user.email }}</p>
+          {% if profile.company_name %}
+            <p><i class="bi bi-building"></i> {{ profile.company_name }}</p>
+          {% endif %}
+          {% if profile.phone %}
+            <p><i class="bi bi-telephone"></i> {{ profile.phone }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Edit form -->
+    <div class="col-md-8">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0">Update Profile</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data" class="row g-3">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="col-md-6">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" value="{{ request.user.username }}" disabled>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" value="{{ request.user.email }}" disabled>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Phone</label>
+              {{ form.phone|add_class:"form-control" }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Company Name</label>
+              {{ form.company_name|add_class:"form-control" }}
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Profile Picture</label>
+              {{ form.profile_picture }}
+            </div>
+
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

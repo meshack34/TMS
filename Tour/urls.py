@@ -10,7 +10,9 @@ urlpatterns = [
     path("logout/", views.logout_user, name="logout"),
 
     # dashboard
-    path("dashboard/", views.dashboard, name="dashboard"),
+    path("iterinary/", views.iterinary, name="iterinary"),
+    path("dashboard/", views.dashboard_view, name="dashboard"),
+    path("profile/", views.profile_view, name="profile"),
 
     # clients
     path("clients/", views.client_list, name="client_list"),

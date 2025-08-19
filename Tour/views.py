@@ -22,7 +22,7 @@ from .models import (
     Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, TravelLeg, Restaurant
 )
 from .forms import (
-    PlannerCreationForm,
+    PlannerCreationForm,ProfileForm,
     ClientForm, BookingForm, DestinationForm, DestinationImageForm,
     ActivityForm, StayForm, DiningExpenseForm, RestaurantForm, TravelLegForm
 )
@@ -73,7 +73,7 @@ def logout_user(request):
 
 # ---------- Dashboard ----------
 @login_required
-def dashboard(request):
+def iterinary(request):
     """
     Shows recent bookings + their destinations, with quick-add links.
     """
@@ -85,8 +85,36 @@ def dashboard(request):
         )
         .order_by("-created_at")[:20]
     )
-    return render(request, "tour/dashboard.html", {"bookings": bookings})
+    return render(request, "tour/iterinary.html", {"bookings": bookings})
 
+
+from django.shortcuts import render
+from .models import Client, Booking, Destination
+
+# def dashboard_view(request):
+#     context = {
+#         "clients_count": Client.objects.count(),
+#         "bookings_count": Booking.objects.count(),
+#         "destinations_count": Destination.objects.count(),
+#         # "itineraries_count": Itinerary.objects.count(),
+#         "recent_bookings": Booking.objects.select_related("client", "destination").order_by("-start_date")[:5],
+#     }
+#     return render(request, "tour/dashboard.html", context)
+
+
+@login_required
+def dashboard_view(request):
+    user_profile = request.user.profile
+
+    context = {
+        "profile": user_profile,
+        "clients_count": Client.objects.count(),
+        "bookings_count": Booking.objects.count(),
+        "destinations_count": Destination.objects.count(),
+        "activities_count": Activity.objects.count(),
+        "recent_bookings": Booking.objects.order_by("-created_at")[:5],
+    }
+    return render(request, "tour/dashboard.html", context)
 
 # ---------- Client pages ----------
 @login_required
@@ -766,3 +794,18 @@ def booking_pdf(request, pk):
     # Build PDF
     doc.build(elements)
     return response
+
+
+# views.py
+@login_required
+def profile_view(request):
+    profile = request.user.profile
+    if request.method == "POST":
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect("profile")
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, "tour/profile.html", {"form": form, "profile": profile})

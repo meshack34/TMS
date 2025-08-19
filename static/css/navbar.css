@@ -1,70 +1,60 @@
+/* static/css/navbar.css */
 
-/* Navbar Styles */
-    .navbar-nav .nav-link {
-      position: relative;
-      transition: color 0.3s ease;
+.topbar {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    background: linear-gradient(90deg, #0077b6, #00b4d8);
+    color: white;
+    padding: 0 20px;
+    height: 60px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.topbar .brand {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+.topbar .nav-links {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.topbar .nav-links a {
+    color: white;
+    font-size: 16px;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.topbar .nav-links a:hover {
+    color: #ffe066;
+}
+
+.topbar .auth-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.topbar .auth-links a:hover {
+    color: #ffb703;
+}
+
+@media (max-width: 768px) {
+    .topbar {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
     }
-
-    .navbar-nav .nav-link::after {
-      content: '';
-      position: absolute;
-      width: 0%;
-      height: 2px;
-      bottom: 0;
-      left: 0;
-      background-color: #fff;
-      transition: width 0.3s;
+    .nav-links {
+        grid-column: 1 / -1;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 5px;
     }
-
-    .navbar-nav .nav-link:hover::after {
-      width: 100%;
-    }
-
-    .navbar-brand img {
-      margin-right: 8px;
-    }
-
-    .navbar-nav .nav-item {
-      padding: 0 0.75rem;
-    }
-
-    .btn-outline-light {
-      transition: all 0.3s ease;
-    }
-
-    .btn-outline-light:hover {
-      background-color: white;
-      color: #0d6efd;
-      border-color: white;
-    }
-
-    @media (max-width: 991px) {
-      .navbar-nav {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .navbar-nav .nav-item {
-        margin-bottom: 10px;
-      }
-    }
-               @media (max-width: 575px) {
-                 .navbar-brand img {
-               width: 30px;
-               height: 30px;
-                 }
-               
-                 .navbar-nav .nav-link {
-               font-size: 0.9rem;
-                 }
-               }
-               @media (min-width: 992px) {
-                 .navbar-brand img {      
-               width: 40px;
-               height: 40px;
-                 }
-               
-                 .navbar-nav .nav-link {                    
-               font-size: 1.1rem;
-                 }
-                }
+}
