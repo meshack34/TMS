@@ -1,0 +1,22 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark h-100">
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item">
+      <a href="{% url 'dashboard' %}" class="nav-link text-white"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+    </li>
+    <li>
+      <a href="{% url 'client_list' %}" class="nav-link text-white"><i class="bi bi-people me-2"></i> Clients</a>
+    </li>
+    <li>
+      <a href="{% url 'booking_list' %}" class="nav-link text-white"><i class="bi bi-calendar-check me-2"></i> Bookings</a>
+    </li>
+    <li>
+      <a href="{% url 'add_destination' booking_id=1 %}" class="nav-link text-white"><i class="bi bi-geo-alt me-2"></i> Destinations</a>
+    </li>
+    {% comment %} <li>
+      <a href="{% url 'itinerary' %}" class="nav-link text-white"><i class="bi bi-map me-2"></i> Itinerary</a>
+    </li> {% endcomment %}
+    <li>
+      <a href="{% url 'profile' %}" class="nav-link text-white"><i class="bi bi-person me-2"></i> Profile</a>
+    </li>
+  </ul>
+</div>
