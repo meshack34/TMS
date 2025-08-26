@@ -87,7 +87,7 @@
                   <td>{{ booking.client.name }}</td>
                   <td>{{ booking.start_date }}</td>
                   <td>{{ booking.end_date }}</td>
-                  <td>${{ booking.grand_total|floatformat:2 }}</td>
+                  <td>KSH {{ booking.grand_total|floatformat:2 }}</td>
                 </tr>
               {% empty %}
                 <tr><td colspan="4" class="text-center text-muted py-3">No bookings yet.</td></tr>

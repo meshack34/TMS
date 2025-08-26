@@ -26,11 +26,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>Accommodation</td><td class="text-end">${{ breakdown.Accommodation }}</td></tr>
-          <tr><td>Activities</td><td class="text-end">${{ breakdown.Activities }}</td></tr>
-          <tr><td>Dining</td><td class="text-end">${{ breakdown.Dining }}</td></tr>
-          <tr><td>Transport</td><td class="text-end">${{ breakdown.Transport }}</td></tr>
-          <tr class="fw-bold"><td>Total</td><td class="text-end">${{ breakdown.Total }}</td></tr>
+          <tr><td>Accommodation</td><td class="text-end">KSH{{ breakdown.Accommodation }}</td></tr>
+          <tr><td>Activities</td><td class="text-end">KSH{{ breakdown.Activities }}</td></tr>
+          <tr><td>Dining</td><td class="text-end">KSH{{ breakdown.Dining }}</td></tr>
+          <tr><td>Transport</td><td class="text-end">KSH{{ breakdown.Transport }}</td></tr>
+          <tr class="fw-bold"><td>Total</td><td class="text-end">KSH{{ breakdown.Total }}</td></tr>
         </tbody>
       </table>
       {% endwith %}
@@ -51,7 +51,7 @@
             <td>{{ leg.mode }}</td>
             <td>{{ leg.from_location }}{% if leg.from_destination %} ({{ leg.from_destination.name }}){% endif %}</td>
             <td>{{ leg.to_location }}{% if leg.to_destination %} ({{ leg.to_destination.name }}){% endif %}</td>
-            <td class="text-end">${{ leg.cost }}</td>
+            <td class="text-end">KSH{{ leg.cost }}</td>
           </tr>
           {% empty %}
           <tr><td colspan="5" class="text-center text-muted">No travel legs added yet.</td></tr>

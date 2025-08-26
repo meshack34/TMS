@@ -1,0 +1,665 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <title>Nomad Tour Management System</title>
+  <style>
+  /* Global styles */
+body {
+  font-family: Verdana, sans-serif;
+  background-color: #e6f7ff;
+  color: #333;
+  line-height: 1.8;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  padding-top: 60px; /* adjust to navbar height */
+
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+header, footer {
+  background-color: #004d80;
+  color: white;
+  text-align: center;
+  padding: 10px;
+}
+
+h1 {
+  margin: 10px 0;
+  font-size: 22px;
+  transition: font-size 0.3s ease;
+}
+
+h2 {
+  color: #004d80;
+  margin-top: 0;
+}
+
+/* Navbar */
+.navbar {
+  position: fixed; /* your fixed navbar */
+  top: 0;
+  left: 0;
+  width: 100%;    /* full width so hamburger is inside viewport */
+  z-index: 1000;
+  background-color: #004d80;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: padding 0.3s ease;
+}
+
+
+.navbar.shrink {
+  padding: 5px 20px;
+  background-color: #003355;
+}
+
+.navbar.shrink h1 {
+  font-size: 18px;
+}
+
+.navbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+}
+
+.navbar ul li {
+  display: inline;
+}
+
+.navbar ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.navbar ul li a:hover {
+  color: #ffcc00;
+}
+
+.navbar ul li a.active {
+  border-bottom: 2px solid #ffcc00;
+  color: #ffcc00;
+}
+
+/* To prevent page content from being hidden under the fixed navbar */
+
+/* Hamburger menu */
+.menu-toggle {
+  display: none; /* becomes flex via media query */
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+  z-index: 1100; 
+  position: relative;       /* keep it in navbar flow */
+  margin-right: 10px;       /* add some space from edge */
+}
+
+
+.menu-toggle div {
+  width: 50px;
+  height: 4px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+
+.menu-toggle.open div:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menu-toggle.open div:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.open div:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Show hamburger on mobile */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: flex;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .navbar ul {
+    flex-direction: column;
+    background-color: #004d80;
+    width: 100%;
+    position: fixed;      /* fixed to viewport */
+    top: 60px;            /* adjust to match navbar height */
+    left: -100%;          /* hidden by default */
+    transition: left 0.3s ease-in-out;
+    padding: 20px 0;      /* enough clickable area */
+    gap: 10px;            /* spacing between menu items */
+    z-index: 1000;        /* above content */
+  }
+
+  .navbar ul.show {
+    left: 0;
+  }
+
+  .navbar ul li {
+    text-align: center;
+    margin: 10px 0;
+  }
+
+  .menu-toggle {
+    display: flex;
+    z-index: 1100; /* ensure hamburger is clickable */
+  }
+}
+
+
+
+/* Hero Section */
+#home {
+  min-height: 20vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: none;
+}
+
+#home h1 {
+  color: #004d80;
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+#home p {
+  font-size: 22px;
+  color: #333;
+  max-width: 800px;
+  margin: 0 auto 30px auto;
+}
+
+#home a {
+  background: #ffffff;
+  color: #004d80;
+  padding: 14px 30px;
+  border-radius: 8px;
+  border: 1px solid #004d80;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+/* About Section */
+#about {
+  max-width: 100%;
+  padding: 80px 50px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+#about h2 {
+  color: #004d80;
+  font-size: 38px;
+  margin-bottom: 40px;
+  font-weight: bold;
+}
+
+#about p {
+  font-size: 19px;
+  color: #333;
+  margin-bottom: 25px;
+  line-height: 1.9;
+}
+
+/* Why Choose Us Section */
+#why {
+  max-width: 100%;
+  padding: 80px 40px;
+  text-align: center;
+}
+
+#why h2 {
+  color: #004d80;
+  font-size: 38px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+#why > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  text-align: left;
+}
+
+#why > div > div {
+  background: #f9f9f9;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+#why h3 {
+  color: #004d80;
+  margin-bottom: 15px;
+}
+
+#why h3 i {
+  margin-right: 10px;
+  color: #004d80;
+}
+
+#why p {
+  color: #333;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* Main content sections */
+main {
+  padding: 20px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+section {
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+section:hover {
+  transform: translateY(-5px);
+}
+
+/* Testimonials Section */
+#testimonials {
+  padding: 60px 20px;
+  background: #fff;
+  text-align: center;
+}
+
+.testimonial-container {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.testimonial-slide {
+  display: none;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f9f9f9;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+.testimonial-slide.active {
+  display: block;
+}
+
+.testimonial-slide p {
+  color: #333;
+  font-size: 18px;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.testimonial-slide div {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+}
+
+.testimonial-slide img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.testimonial-slide strong {
+  color: #004d80;
+}
+
+.testimonial-slide span {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Dots */
+.dot {
+  height: 12px;
+  width: 12px;
+  margin: 0 5px;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+  background: #bbb;
+}
+
+.dot.active {
+  background: #004d80;
+}
+
+/* Footer */
+footer {
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar" id="navbar">
+      <h1 style="color:white; margin:0;">Nomad Tour Management System</h1>
+      <div class="menu-toggle" id="menu-toggle">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+      <ul id="nav-links">
+        <li><a href="#home" class="active">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#why">Why Choose Us</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#contact">Contact Us</a></li>
+        <li><a href="{% url 'login'%}">Login / Sign Up</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+<section id="home" style="
+  min-height:20vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  border: none;
+">
+  <h1 style="color:#004d80; font-size:48px; margin-bottom:20px;">
+    Africa's Leading Tour Management System
+  </h1>
+  <p style="font-size:22px; color:#333; max-width:800px; margin:auto; margin-bottom:30px;">
+    Plan, organize, and enjoy seamless travel experiences with <strong>Nomad</strong>.
+  </p>
+  <a href="#about" 
+     style="background:#ffffff; color:#004d80; padding:14px 30px; border-radius:8px; border-color:#004d80;text-decoration:none; font-size:18px;">
+     Get Started
+  </a>
+</section>
+<section id="about" style="
+  max-width: 100%;
+  padding: 80px 50px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  text-align: center;
+">
+  <h2 style="color:#004d80; font-size:38px; margin-bottom:40px; font-weight: bold;">
+    About Us
+  </h2>
+
+  <p style="font-size:19px; color:#333; margin-bottom:25px; line-height:1.9;">
+    <strong>Nomad Tour Management System</strong> is dedicated to providing exceptional travel experiences by offering innovative solutions for organizing and managing tours. With a focus on customer satisfaction and efficiency, we aim to make travel planning seamless and enjoyable for everyone.
+  </p>
+  
+
+</section>
+
+<section id="why" style="
+  max-width: 100%;
+  padding: 80px 40px;
+  text-align: center;
+">
+ 
+
+
+ <h2 style="color:#004d80; font-size:38px; text-align:center; font-weight: bold;">
+    Why Choose Our Tour Management System?
+  </h2>
+  <div style="
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    text-align: left;
+  ">
+    <div style="background:#f9f9f9; padding:25px; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+      <h3 style="color:#004d80; margin-bottom:15px;">
+        <i class="fas fa-clock" style="margin-right:10px; color:#004d80;"></i> Save Time
+      </h3>
+      <p style="color:#333; font-size:17px; line-height:1.8;">
+        Easily organize and manage all your tours in one centralized platform.
+      </p>
+    </div>
+
+    <div style="background:#f9f9f9; padding:25px; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+      <h3 style="color:#004d80; margin-bottom:15px;">
+        <i class="fas fa-calendar-alt" style="margin-right:10px; color:#004d80;"></i> Detailed Itineraries
+      </h3>
+      <p style="color:#333; font-size:17px; line-height:1.8;">
+        Access well-structured itineraries and schedules with just a few clicks.
+      </p>
+    </div>
+
+    <div style="background:#f9f9f9; padding:25px; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+      <h3 style="color:#004d80; margin-bottom:15px;">
+        <i class="fas fa-comments" style="margin-right:10px; color:#004d80;"></i> Seamless Communication
+      </h3>
+      <p style="color:#333; font-size:17px; line-height:1.8;">
+        Stay connected with clients and team members effortlessly.
+      </p>
+    </div>
+
+    <div style="background:#f9f9f9; padding:25px; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+      <h3 style="color:#004d80; margin-bottom:15px;">
+        <i class="fas fa-user-check" style="margin-right:10px; color:#004d80;"></i> User-Friendly
+      </h3>
+      <p style="color:#333; font-size:17px; line-height:1.8;">
+        Enjoy an interface designed for simplicity and efficiency.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="testimonials" style="padding:60px 20px; background:#fff; text-align:center;">
+
+  <div class="testimonial-container" style="max-width:800px; margin:0 auto; position:relative;">
+      <h2 style="color:#004d80; font-size:32px; margin-bottom:40px;">What Our Clients Say</h2>
+
+    <!-- Slides -->
+    <div class="testimonial-slide active" style="display:block; border:1px solid #ddd; border-radius:10px; background:#f9f9f9; padding:30px; box-sizing:border-box;">
+      <p style="color:#333; font-size:18px; line-height:1.8; margin-bottom:20px;">
+        "This tour management system has completely transformed the way I plan my trips. Highly recommended!"
+      </p>
+      <div style="display:flex; align-items:center; gap:15px; justify-content:center;">
+        <img src="https://via.placeholder.com/60" alt="John Doe" style="width:60px; height:60px; border-radius:50%;">
+        <div style="text-align:left;">
+          <strong style="color:#004d80;">John Doe</strong><br>
+          <span style="color:#666; font-size:14px;">Travel Enthusiast</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial-slide" style="display:none; border:1px solid #ddd; border-radius:10px; background:#f9f9f9; padding:30px; box-sizing:border-box;">
+      <p style="color:#333; font-size:18px; line-height:1.8; margin-bottom:20px;">
+        "The user-friendly interface and excellent customer support make this system a must-have for any travel enthusiast."
+      </p>
+      <div style="display:flex; align-items:center; gap:15px; justify-content:center;">
+        <img src="https://via.placeholder.com/60" alt="Jane Smith" style="width:60px; height:60px; border-radius:50%;">
+        <div style="text-align:left;">
+          <strong style="color:#004d80;">Jane Smith</strong><br>
+          <span style="color:#666; font-size:14px;">Adventure Blogger</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial-slide" style="display:none; border:1px solid #ddd; border-radius:10px; background:#f9f9f9; padding:30px; box-sizing:border-box;">
+      <p style="color:#333; font-size:18px; line-height:1.8; margin-bottom:20px;">
+        "I love how easy it is to organize and manage my tours. It saves me so much time!"
+      </p>
+      <div style="display:flex; align-items:center; gap:15px; justify-content:center;">
+        <img src="https://via.placeholder.com/60" alt="Michael Brown" style="width:60px; height:60px; border-radius:50%;">
+        <div style="text-align:left;">
+          <strong style="color:#004d80;">Michael Brown</strong><br>
+          <span style="color:#666; font-size:14px;">Frequent Traveler</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial-slide" style="display:none; border:1px solid #ddd; border-radius:10px; background:#f9f9f9; padding:30px; box-sizing:border-box;">
+      <p style="color:#333; font-size:18px; line-height:1.8; margin-bottom:20px;">
+        "The detailed itineraries and seamless communication features are simply amazing. Great job!"
+      </p>
+      <div style="display:flex; align-items:center; gap:15px; justify-content:center;">
+        <img src="https://via.placeholder.com/60" alt="Emily Davis" style="width:60px; height:60px; border-radius:50%;">
+        <div style="text-align:left;">
+          <strong style="color:#004d80;">Emily Davis</strong><br>
+          <span style="color:#666; font-size:14px;">Tour Operator</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dots -->
+    <div style="text-align:center; margin-top:20px;">
+      <span class="dot active" style="height:12px; width:12px; margin:0 5px; background:#004d80; border-radius:50%; display:inline-block; cursor:pointer;"></span>
+      <span class="dot" style="height:12px; width:12px; margin:0 5px; background:#bbb; border-radius:50%; display:inline-block; cursor:pointer;"></span>
+      <span class="dot" style="height:12px; width:12px; margin:0 5px; background:#bbb; border-radius:50%; display:inline-block; cursor:pointer;"></span>
+      <span class="dot" style="height:12px; width:12px; margin:0 5px; background:#bbb; border-radius:50%; display:inline-block; cursor:pointer;"></span>
+    </div>
+  </div>
+</section>
+
+
+
+<section id="contact">
+  <h2 style="color:#004d80; text-align:center; margin-bottom:30px;">Contact Us</h2>
+
+  <p style="text-align:center; font-size:18px; max-width:800px; margin:auto; margin-bottom:30px;">
+    Nomad Tour Management System helps you plan, organize, and manage your travel experiences seamlessly. 
+    Reach out to us for support, inquiries, or collaboration opportunities.
+  </p>
+
+  <div style="display:flex;  justify-content:space-around; gap:40px; text-align:left;">
+
+    <div style="min-width:250px;">
+      <h3 style="color:#004d80;">Contact Info</h3>
+      <p><strong>Location:</strong> 123 Main Street, Springfield, USA</p>
+      <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+      <p><strong>Email:</strong> support@nomadtours.com</p>
+    </div>
+
+
+    <div style="min-width:250px;">
+      <h3 style="color:#004d80;">Resources</h3>
+      <ul style="list-style:none; padding:0;">
+        <li><a href="https://www.nomadtours.com/blog" target="_blank" style="color:#004d80; text-decoration:none;">Blog</a></li>
+        <li><a href="https://www.nomadtours.com/help" target="_blank" style="color:#004d80; text-decoration:none;">Help Center</a></li>
+        <li><a href="https://www.nomadtours.com/terms" target="_blank" style="color:#004d80; text-decoration:none;">Terms & Conditions</a></li>
+        <li><a href="https://www.nomadtours.com/privacy" target="_blank" style="color:#004d80; text-decoration:none;">Privacy Policy</a></li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+
+  </main>
+
+  <footer>
+    <p>&copy; 2023 Tour Management System. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Navbar shrink on scroll
+    window.addEventListener("scroll", function() {
+      const navbar = document.getElementById("navbar");
+      if (window.scrollY > 50) {
+        navbar.classList.add("shrink");
+      } else {
+        navbar.classList.remove("shrink");
+      }
+    });
+
+    // Mobile menu toggle
+    const menuToggle = document.getElementById("menu-toggle");
+    const navLinks = document.getElementById("nav-links");
+
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("show");
+      menuToggle.classList.toggle("open");
+    });
+
+    // Active link highlight on scroll
+    const sections = document.querySelectorAll("section");
+    const links = document.querySelectorAll(".navbar ul li a");
+
+    window.addEventListener("scroll", () => {
+      let current = "";
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 80;
+        if (pageYOffset >= sectionTop) {
+          current = section.getAttribute("id");
+        }
+      });
+
+      links.forEach(link => {
+        link.classList.remove("active");
+        if (link.getAttribute("href") === "#" + current) {
+          link.classList.add("active");
+        }
+      });
+    });
+      let slideIndex = 0;
+  const slides = document.querySelectorAll(".testimonial-slide");
+  const dots = document.querySelectorAll(".dot");
+
+  function showSlide(n) {
+    slides.forEach((slide, i) => {
+      slide.style.display = (i === n) ? "block" : "none";
+      dots[i].style.background = (i === n) ? "#004d80" : "#bbb";
+    });
+    slideIndex = n;
+  }
+
+  function nextSlide() {
+    slideIndex = (slideIndex + 1) % slides.length;
+    showSlide(slideIndex);
+  }
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener("click", () => {
+      showSlide(i);
+    });
+  });
+
+  // Auto play every 5s
+  setInterval(nextSlide, 5000);
+
+  // Init
+  showSlide(slideIndex);
+
+  </script>
+</body>
+</html>
