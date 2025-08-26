@@ -16,6 +16,16 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from django.shortcuts import render
+
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+    Image as RLImage, PageBreak
+)
+from reportlab.lib.pagesizes import A4
+import os
 from .models import (
     Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, TravelLeg, Restaurant
 )
@@ -424,217 +434,6 @@ def upload_travel_leg(request, booking_id):
 
 
 
-
-
-# print
-
-
-# views.py
-# from decimal import Decimal
-# from django.shortcuts import get_object_or_404
-# from django.http import HttpResponse
-# from django.template.loader import render_to_string
-# from django.contrib.auth.decorators import login_required
-# from django.db.models import Prefetch
-
-# from .models import Booking, Destination, TravelLeg
-
-# from django.http import HttpResponse
-# from django.shortcuts import get_object_or_404
-# from reportlab.lib.pagesizes import A4
-# from reportlab.pdfgen import canvas
-# from .models import Booking
-# from reportlab.platypus import (
-#     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
-# )
-# from reportlab.lib.pagesizes import A4
-# from reportlab.lib import colors
-# from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-# from django.http import HttpResponse
-# from django.shortcuts import get_object_or_404
-# from django.contrib.auth.decorators import login_required
-# from django.conf import settings
-# import os
-
-# from .models import Booking  # adjust to your app structure
-
-
-# @login_required
-# def booking_pdf(request, pk):
-#     booking = get_object_or_404(Booking, pk=pk)
-
-#     # Prepare PDF response
-#     response = HttpResponse(content_type="application/pdf")
-#     response["Content-Disposition"] = f'attachment; filename="booking_{pk}.pdf"'
-
-#     # Document setup
-#     doc = SimpleDocTemplate(
-#         response,
-#         pagesize=A4,
-#         rightMargin=5,
-#         leftMargin=5,
-#         topMargin=30,
-#         bottomMargin=30,
-#     )
-#     styles = getSampleStyleSheet()
-#     styles.add(ParagraphStyle(name="CenterTitle", fontSize=16, alignment=1, spaceAfter=50))
-#     styles.add(ParagraphStyle(name="TableHeading", fontSize=12, spaceAfter=50, textColor=colors.HexColor("#333333")))
-
-#     elements = []
-
-#     # Header
-#     elements.append(Paragraph("Travel Management System", styles["Title"]))
-#     elements.append(Paragraph(f"Booking Report - {booking.client.name}", styles["CenterTitle"]))
-#     elements.append(Spacer(1, 12))
-
-#     # ---------- LEFT (Summary) ----------
-#     left_content = []
-
-#     # Booking Info
-#     info_data = [
-#         ["Client:", booking.client.name],
-#         ["Start Date:", str(booking.start_date)],
-#         ["End Date:", str(booking.end_date)],
-#     ]
-#     info_table = Table(info_data, colWidths=[100, 200])
-#     info_table.setStyle(TableStyle([
-#         ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
-#         ("BOX", (0, 0), (-1, -1), 1, colors.grey),
-#         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-#         ("FONTSIZE", (0, 0), (-1, -1), 9),
-#     ]))
-#     left_content.append(Paragraph("Booking Info", styles["TableHeading"]))
-#     left_content.append(info_table)
-#     left_content.append(Spacer(1, 12))
-
-#     # Cost Breakdown
-#     breakdown = booking.cost_breakdown()
-#     cost_data = [["Category", "Cost ($)"]]
-#     for k, v in breakdown.items():
-#         cost_data.append([k, f"{v:.2f}"])
-#     cost_table = Table(cost_data, colWidths=[120, 150])
-#     cost_table.setStyle(TableStyle([
-#         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#007ACC")),
-#         ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-#         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-#         ("FONTSIZE", (0, 0), (-1, -1), 9),
-#     ]))
-#     left_content.append(Paragraph("Cost Breakdown", styles["TableHeading"]))
-#     left_content.append(cost_table)
-#     left_content.append(Spacer(1, 12))
-
-#     # Travel Itinerary
-#     legs = booking.travel_legs.all()
-#     if legs:
-#         travel_data = [["Date", "Mode", "From", "To", "Cost ($)"]]
-#         for leg in legs:
-#             travel_data.append([
-#                 str(leg.date),
-#                 leg.mode,
-#                 str(leg.from_destination or leg.from_location),
-#                 str(leg.to_destination or leg.to_location),
-#                 f"{leg.cost:.2f}",
-#             ])
-#         travel_table = Table(travel_data, colWidths=[55, 60, 90, 90, 65])
-#         travel_table.setStyle(TableStyle([
-#             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#444444")),
-#             ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-#             ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-#             ("FONTSIZE", (0, 0), (-1, -1), 8),
-#             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.whitesmoke, colors.lightgrey]),
-#         ]))
-#         left_content.append(Paragraph("Travel Itinerary", styles["TableHeading"]))
-#         left_content.append(travel_table)
-
-#     # ---------- RIGHT (Images) ----------
-#     right_content = []
-
-#     # Destinations
-#     right_content.append(Paragraph("Destinations", styles["TableHeading"]))
-#     for d in booking.destinations.all():
-#         right_content.append(Paragraph(f"<b>{d.name}</b>", styles["Normal"]))
-
-#         imgs = []
-#         row = []
-#         for g in d.galleries.all()[:4]:  # up to 4 per destination
-#             if g.image and os.path.exists(g.image.path):
-#                 try:
-#                     img = RLImage(g.image.path, width=120, height=90)
-#                     row.append(img)
-#                     if len(row) == 2:
-#                         imgs.append(row)
-#                         row = []
-#                 except Exception:
-#                     pass
-#         if row:
-#             imgs.append(row)
-
-#         if imgs:
-#             img_table = Table(imgs, hAlign="LEFT", colWidths=[130, 130])
-#             img_table.setStyle(TableStyle([
-#                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-#                 ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-#             ]))
-#             right_content.append(img_table)
-
-#         right_content.append(Spacer(1, 10))
-
-#     # Restaurants
-#     right_content.append(Paragraph("Restaurants", styles["TableHeading"]))
-#     for d in booking.destinations.all():
-#         for r in d.restaurants.all():
-#             right_content.append(Paragraph(r.name, styles["Normal"]))
-#             if r.image and os.path.exists(r.image.path):
-#                 try:
-#                     img = RLImage(r.image.path, width=120, height=90)
-#                     img_table = Table([[img]], hAlign="LEFT", colWidths=[130])
-#                     img_table.setStyle(TableStyle([
-#                         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-#                         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-#                     ]))
-#                     right_content.append(img_table)
-#                 except Exception:
-#                     pass
-#             right_content.append(Spacer(1, 8))
-
-
-#     main_table = Table(
-#         [[left_content, right_content]],
-#         colWidths=[280, 240],
-#         hAlign="CENTER",
-#     )
-#     main_table.setStyle(TableStyle([
-#         ("VALIGN", (0, 0), (-1, -1), "TOP"),
-#         ("LEFTPADDING", (0, 0), (-1, -1), 6),
-#         ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-#     ]))
-#     elements.append(main_table)
-
-#     # Footer
-#     elements.append(Spacer(1, 20))
-#     elements.append(Paragraph("Generated by TMS © 2023", styles["Normal"]))
-
-#     # Build PDF
-#     doc.build(elements)
-#     return response
-
-
-
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    Image as RLImage, PageBreak
-)
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-import os
-
-from .models import Booking
-
-
 @login_required
 def booking_pdf(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
@@ -783,3 +582,60 @@ def profile_view(request):
     else:
         form = ProfileForm(instance=profile)
     return render(request, "tour/profile.html", {"form": form, "profile": profile})
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Profile, Subscription
+from .forms import SubscriptionForm
+
+@login_required
+def planner_list(request):
+    """List all planners with latest subscription"""
+    planners = Profile.objects.select_related("user").prefetch_related("subscriptions")
+    return render(request, "tour/planner_list.html", {"planners": planners})
+
+
+@login_required
+def subscription_list(request, profile_id):
+    """Show all subscriptions for a given planner"""
+    profile = get_object_or_404(Profile, id=profile_id)
+    subscriptions = profile.subscriptions.order_by("-start_date")
+    return render(request, "tour/subscription_list.html", {"profile": profile, "subscriptions": subscriptions})
+
+
+@login_required
+def subscription_create(request, profile_id):
+    """Add a new subscription to a planner"""
+    profile = get_object_or_404(Profile, id=profile_id)
+
+    if request.method == "POST":
+        form = SubscriptionForm(request.POST)
+        if form.is_valid():
+            subscription = form.save(commit=False)
+            subscription.profile = profile
+            subscription.save()
+            messages.success(request, "Subscription created successfully.")
+            return redirect("subscription_list", profile_id=profile.id)
+    else:
+        form = SubscriptionForm()
+
+    return render(request, "tour/subscription_form.html", {"form": form, "profile": profile})
+
+
+@login_required
+def subscription_edit(request, pk):
+    """Edit an existing subscription"""
+    subscription = get_object_or_404(Subscription, pk=pk)
+
+    if request.method == "POST":
+        form = SubscriptionForm(request.POST, instance=subscription)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Subscription updated successfully.")
+            return redirect("subscription_list", profile_id=subscription.profile.id)
+    else:
+        form = SubscriptionForm(instance=subscription)
+
+    return render(request, "tour/subscription_form.html", {"form": form, "profile": subscription.profile})

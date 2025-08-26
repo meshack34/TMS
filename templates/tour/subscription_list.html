@@ -1,0 +1,33 @@
+{% extends "base_dashboard.html" %}
+{% block content %}
+<h2>Subscriptions for {{ profile.user.username }}</h2>
+<a href="{% url 'subscription_create' profile.id %}" class="btn btn-success mb-2">Add Subscription</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Plan</th>
+            <th>Fee</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for sub in subscriptions %}
+        <tr>
+            <td>{{ sub.plan }}</td>
+            <td>{{ sub.fee }}</td>
+            <td>{{ sub.start_date }}</td>
+            <td>{{ sub.end_date }}</td>
+            <td>{{ sub.status }}</td>
+            <td>
+                <a href="{% url 'subscription_edit' sub.id %}" class="btn btn-sm btn-warning">Edit</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="6">No subscriptions yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

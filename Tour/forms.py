@@ -130,3 +130,11 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["profile_picture", "phone", "company_name"]
+
+from django import forms
+from .models import Subscription
+
+class SubscriptionForm(forms.ModelForm):
+    class Meta:
+        model = Subscription
+        fields = ["plan", "fee", "start_date", "end_date", "is_active"]

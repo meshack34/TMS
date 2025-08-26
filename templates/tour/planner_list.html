@@ -1,0 +1,38 @@
+{% extends "base_dashboard.html" %}
+{% block content %}
+<h2>Planner List</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Company</th>
+            <th>Phone</th>
+            <th>Latest Subscription</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for planner in planners %}
+        {% with sub=planner.subscriptions.last %}
+        <tr>
+            <td>{{ planner.user.username }}</td>
+            <td>{{ planner.company_name }}</td>
+            <td>{{ planner.phone }}</td>
+            <td>
+                {% if sub %}
+                    {{ sub.plan }} - {{ sub.fee }} KSH ({{ sub.start_date }} → {{ sub.end_date }})
+                {% else %}
+                    No subscription
+                {% endif %}
+            </td>
+            <td>{% if sub %}{{ sub.status }}{% endif %}</td>
+            <td>
+                <a href="{% url 'subscription_list' planner.id %}" class="btn btn-sm btn-primary">Manage</a>
+            </td>
+        </tr>
+        {% endwith %}
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

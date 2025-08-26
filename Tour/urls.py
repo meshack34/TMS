@@ -44,4 +44,9 @@ urlpatterns = [
     path("booking/<int:pk>/", views.BookingDetailView.as_view(), name="booking_detail"),
     path("booking/<int:pk>/pdf/", views.booking_pdf, name="booking_pdf"),
 
+
+    path("planners/", views.planner_list, name="planner_list"),
+    path("planners/<int:profile_id>/subscriptions/", views.subscription_list, name="subscription_list"),
+    path("planners/<int:profile_id>/subscriptions/add/", views.subscription_create, name="subscription_create"),
+    path("subscriptions/<int:pk>/edit/", views.subscription_edit, name="subscription_edit"),
 ]

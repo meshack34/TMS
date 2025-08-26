@@ -1,43 +1,42 @@
 {% extends "main.html" %}
+{% load static %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
 
-            <h2 class="mb-4 text-center">Login</h2>
+<div class="auth-container">
+    <div class="auth-card shadow-lg">
+        <h2 class="mb-4 text-center auth-title">Login</h2>
 
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" name="username" id="username" class="form-control" required>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show custom-alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
+            {% endfor %}
+        {% endif %}
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" name="password" id="password" class="form-control" required>
-                </div>
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" id="username" class="form-control" required>
+            </div>
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-success">Login</button>
-                </div>
-            </form>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" id="password" class="form-control" required>
+            </div>
 
-            <p class="mt-3 text-center">
-                Don’t have an account? <a href="{% url 'register' %}">Register here</a>.
-            </p>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </form>
 
-        </div>
+        <p class="mt-3 text-center auth-footer">
+            Don’t have an account? <a href="{% url 'register' %}">Register here</a>.
+        </p>
     </div>
 </div>
 {% endblock %}

@@ -171,3 +171,32 @@ class TravelLeg(models.Model):
 
     def __str__(self):
         return f"{self.mode} {self.from_location} → {self.to_location} ({self.booking.client.name})"
+
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+
+
+
+class Subscription(models.Model):
+    PLAN_CHOICES = [
+        ("basic", "Basic"),
+        ("pro", "Pro"),
+        ("enterprise", "Enterprise"),
+    ]
+
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="subscriptions")
+    plan = models.CharField(max_length=50, choices=PLAN_CHOICES)
+    fee = models.DecimalField(max_digits=10, decimal_places=2)
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.profile.user.username} - {self.plan} ({'Active' if self.is_active else 'Expired'})"
+
+    def status(self):
+        today = timezone.now().date()
+        if self.end_date < today:
+            return "Expired"
+        return "Active"
