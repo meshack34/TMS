@@ -1,3 +1,5 @@
+{% load static %}
+
 <footer class="footer">
     <div class="footer-grid">
         <div>
@@ -28,3 +30,86 @@
     </div>
     <p class="text-center mt-3">&copy; 2025 Nomad Tour Management System. All rights reserved.</p>
 </footer>
+
+<style>
+/* ======================
+   FOOTER STYLES
+   ====================== */
+.footer {
+  background-color: #f8f9fa;
+  color: #212529;
+  padding: 40px 20px 20px;
+  margin-top: 40px;
+}
+
+.footer h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #0d6efd;
+}
+
+.footer p {
+  font-size: 0.9rem;
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+.footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer ul li {
+  margin-bottom: 8px;
+}
+
+.footer ul li a {
+  color: #495057;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.footer ul li a:hover {
+  color: #0d6efd;
+}
+
+/* Footer Grid */
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 25px;
+  margin-bottom: 20px;
+}
+
+/* Social Icons */
+.footer .bi {
+  font-size: 1.3rem;
+  margin-right: 12px;
+  color: #495057;
+  transition: color 0.2s ease-in-out;
+}
+
+.footer .bi:hover {
+  color: #0d6efd;
+}
+
+/* Bottom note */
+.footer p.text-center {
+  font-size: 0.85rem;
+  margin-top: 15px;
+  color: #6c757d;
+  border-top: 1px solid #dee2e6;
+  padding-top: 10px;
+}
+
+/* ======================
+   RESPONSIVE
+   ====================== */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
