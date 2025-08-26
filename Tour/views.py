@@ -15,9 +15,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-
-
-
+from django.shortcuts import render
 from .models import (
     Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, TravelLeg, Restaurant
 )
@@ -74,9 +72,6 @@ def logout_user(request):
 # ---------- Dashboard ----------
 @login_required
 def iterinary(request):
-    """
-    Shows recent bookings + their destinations, with quick-add links.
-    """
     bookings = (
         Booking.objects
         .select_related("client")
@@ -86,20 +81,6 @@ def iterinary(request):
         .order_by("-created_at")[:20]
     )
     return render(request, "tour/iterinary.html", {"bookings": bookings})
-
-
-from django.shortcuts import render
-from .models import Client, Booking, Destination
-
-# def dashboard_view(request):
-#     context = {
-#         "clients_count": Client.objects.count(),
-#         "bookings_count": Booking.objects.count(),
-#         "destinations_count": Destination.objects.count(),
-#         # "itineraries_count": Itinerary.objects.count(),
-#         "recent_bookings": Booking.objects.select_related("client", "destination").order_by("-start_date")[:5],
-#     }
-#     return render(request, "tour/dashboard.html", context)
 
 
 @login_required
