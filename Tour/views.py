@@ -9,6 +9,11 @@ from django.views.generic import ListView, CreateView, DetailView
 from django.utils.decorators import method_decorator
 from django.db.models import Q, Prefetch
 from decimal import Decimal
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Client
+from .forms import ClientForm
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
@@ -108,11 +113,33 @@ def dashboard_view(request):
     return render(request, "tour/dashboard.html", context)
 
 # ---------- Client pages ----------
+
 @login_required
 def client_list(request):
-    clients = Client.objects.all().order_by("name")
+    clients = Client.objects.all().order_by("first_name", "last_name")
     return render(request, "tour/client_list.html", {"clients": clients})
 
+@login_required
+def client_update(request, pk):
+    client = get_object_or_404(Client, pk=pk)
+    if request.method == "POST":
+        form = ClientForm(request.POST, instance=client)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Client updated successfully.")
+            return redirect("client_list")
+    else:
+        form = ClientForm(instance=client)
+    return render(request, "tour/client_form.html", {"form": form, "client": client})
+
+@login_required
+def client_delete(request, pk):
+    client = get_object_or_404(Client, pk=pk)
+    if request.method == "POST":
+        client.delete()
+        messages.success(request, "Client deleted successfully.")
+        return redirect("client_list")
+    return render(request, "tour/client_confirm_delete.html", {"client": client})
 
 @login_required
 def client_create(request):
@@ -149,9 +176,10 @@ class BookingListView(ListView):
         )
         if q:
             qs = qs.filter(
-                Q(client__name__icontains=q) |
+                Q(client__first_name__icontains=q) |
+                Q(client__last_name__icontains=q) |
                 Q(client__email__icontains=q) |
-                Q(client__phone__icontains=q) |
+                Q(client__phone_number__icontains=q) |
                 Q(destinations__name__icontains=q)
             ).distinct()
         return qs
@@ -432,6 +460,19 @@ def upload_travel_leg(request, booking_id):
     return render(request, "tour/upload_travel_leg.html", {"form": form, "title": "Add Travel Leg", "booking": booking})
 
 
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+    Image as RLImage, PageBreak
+)
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+import os
+
+from .models import Booking
 
 
 @login_required
@@ -459,15 +500,17 @@ def booking_pdf(request, pk):
     elements = []
 
     # ---------------- HEADER ----------------
-    elements.append(Paragraph("Travel Management System", styles["Title"]))
+    elements.append(Paragraph("Tour Travel Management System", styles["Title"]))
     elements.append(Paragraph(f"Booking Report", styles["CenterTitle"]))
-    elements.append(Paragraph(f"Client: <b>{booking.client.name}</b>", styles["NormalText"]))
-    elements.append(Spacer(1, 12))
+
+    client_name = f"{booking.client.first_name} {booking.client.last_name}"
+    elements.append(Paragraph(f"Client: <b>{client_name}</b>", styles["NormalText"]))
+    elements.append(Paragraph(f"Booking ID: <b>{booking.pk}</b>", styles["NormalText"]))
 
     # ---------------- SUMMARY ----------------
     # Booking Info
     info_data = [
-        ["Client:", booking.client.name],
+        ["Client:", client_name],
         ["Start Date:", str(booking.start_date)],
         ["End Date:", str(booking.end_date)],
     ]
@@ -488,7 +531,7 @@ def booking_pdf(request, pk):
     breakdown = booking.cost_breakdown()
     cost_data = [["Category", "Cost (KSH)"]]
     for k, v in breakdown.items():
-        cost_data.append([k, f"{v:.2f}"])
+        cost_data.append([k, f"{v:,.2f}"])  # formatted with commas
     cost_table = Table(cost_data, colWidths=[200, 150])
     cost_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0056A6")),
@@ -512,7 +555,7 @@ def booking_pdf(request, pk):
                 leg.mode,
                 str(leg.from_destination or leg.from_location),
                 str(leg.to_destination or leg.to_location),
-                f"{leg.cost:.2f}",
+                f"{leg.cost:,.2f}",  # formatted with commas
             ])
         travel_table = Table(travel_data, colWidths=[70, 70, 120, 120, 70])
         travel_table.setStyle(TableStyle([
@@ -565,8 +608,6 @@ def booking_pdf(request, pk):
     # Build PDF
     doc.build(elements)
     return response
-
-
 
 
 # views.py

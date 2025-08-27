@@ -8,14 +8,6 @@
     <div class="auth-card shadow-lg">
         <h2 class="mb-4 text-center auth-title">Login</h2>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show custom-alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
 
         <form method="post" class="auth-form">
             {% csrf_token %}

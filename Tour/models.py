@@ -5,15 +5,38 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+
 
 
 class Client(models.Model):
-    name = models.CharField(max_length=255)
-    email = models.EmailField()
-    phone = models.CharField(max_length=20)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+
+    # Extra details
+    date_of_birth = models.DateField(blank=True, null=True)
+    nationality = models.CharField(max_length=100, blank=True, null=True)
+    passport_number = models.CharField(max_length=50, blank=True, null=True)
+    passport_expiry = models.DateField(blank=True, null=True)
+
+    address = models.TextField(blank=True, null=True)
+    emergency_contact_name = models.CharField(max_length=150, blank=True, null=True)
+    emergency_contact_phone = models.CharField(max_length=20, blank=True, null=True)
+
+    # Travel preferences
+    dietary_preferences = models.TextField(blank=True, null=True)  # e.g. vegetarian
+    medical_notes = models.TextField(blank=True, null=True)        # e.g. allergies
+    preferred_language = models.CharField(max_length=50, blank=True, null=True)
+    special_requests = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.first_name} {self.last_name}"
 
 
 class Profile(models.Model):
@@ -34,22 +57,6 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     else:
         instance.profile.save()
 
-# class Client(models.Model):
-#     first_name = models.CharField(max_length=150)
-#     last_name = models.CharField(max_length=150)
-#     email = models.EmailField(blank=True, null=True)
-#     phone = models.CharField(max_length=20, blank=True, null=True)
-#     created_at = models.DateTimeField(default=timezone.now)
-#     updated_at = models.DateTimeField(auto_now=True)
-#     address = models.TextField(blank=True, null=True)  
-#     notes = models.TextField(blank=True, null=True)    
-
-#     def __str__(self):
-#         return f"{self.first_name} {self.last_name}"
-
-#     def full_name(self):
-#         return f"{self.first_name} {self.last_name}"
-
 
 class Booking(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="bookings")
@@ -58,7 +65,7 @@ class Booking(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"Booking #{self.id} - {self.client.name}"
+        return f"Booking #{self.id} - {self.client.first_name} {self.client.last_name}"
 
     # ===== COST AGGREGATION METHODS =====
     def accommodation_total(self):
@@ -99,7 +106,8 @@ class Destination(models.Model):
     end_date = models.DateField()
 
     def __str__(self):
-        return f"{self.name} ({self.booking.client.name})"
+        return f"{self.name} ({self.booking.client.first_name} {self.booking.client.last_name})"
+
 
 class DestinationImage(models.Model):
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='galleries')
@@ -168,15 +176,9 @@ class TravelLeg(models.Model):
     from_destination = models.ForeignKey(Destination, on_delete=models.SET_NULL, null=True, blank=True, related_name="departing_legs")
     to_destination = models.ForeignKey(Destination, on_delete=models.SET_NULL, null=True, blank=True, related_name="arriving_legs")
     cost = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], default=0)
-
+    
     def __str__(self):
-        return f"{self.mode} {self.from_location} → {self.to_location} ({self.booking.client.name})"
-
-from django.db import models
-from django.utils import timezone
-from django.contrib.auth.models import User
-
-
+        return f"{self.mode} {self.from_location} → {self.to_location} ({self.booking.client.first_name} {self.booking.client.last_name})"
 
 class Subscription(models.Model):
     PLAN_CHOICES = [

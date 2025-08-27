@@ -1,0 +1,12 @@
+{% extends "base_dashboard.html" %}
+{% block content %}
+<div class="container my-4">
+    <h2>Delete Client</h2>
+    <p>Are you sure you want to delete <strong>{{ client.first_name }} {{ client.last_name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'client_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

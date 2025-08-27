@@ -26,7 +26,28 @@ class PlannerCreationForm(UserCreationForm):
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ["name", "email", "phone"]
+        fields = [
+            "first_name", "last_name", "email", "phone_number",
+            "date_of_birth", "nationality", "passport_number", "passport_expiry",
+            "address", "emergency_contact_name", "emergency_contact_phone",
+            "dietary_preferences", "medical_notes", "preferred_language",
+            "special_requests",
+        ]
+        widgets = {
+            "date_of_birth": forms.DateInput(attrs={"type": "date", "class": "form-control form-control-sm"}),
+            "passport_expiry": forms.DateInput(attrs={"type": "date", "class": "form-control form-control-sm"}),
+            "address": forms.Textarea(attrs={"rows": 2, "class": "form-control form-control-sm"}),
+            "medical_notes": forms.Textarea(attrs={"rows": 2, "class": "form-control form-control-sm"}),
+            "special_requests": forms.Textarea(attrs={"rows": 2, "class": "form-control form-control-sm"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            existing_classes = field.widget.attrs.get("class", "")
+            field.widget.attrs["class"] = existing_classes + " form-control form-control-sm"
+
+
 
 class BookingForm(forms.ModelForm):
     class Meta:

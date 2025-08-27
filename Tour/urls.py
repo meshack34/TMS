@@ -16,7 +16,10 @@ urlpatterns = [
 
     # clients
     path("clients/", views.client_list, name="client_list"),
-    path("clients/new/", views.client_create, name="client_create"),
+    path("clients/add/", views.client_create, name="client_create"),
+    path("clients/<int:pk>/edit/", views.client_update, name="client_update"),
+    path("clients/<int:pk>/delete/", views.client_delete, name="client_delete"),
+
 
     # bookings
     path("bookings/", views.BookingListView.as_view(), name="booking_list"),

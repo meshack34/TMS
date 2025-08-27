@@ -1,83 +1,79 @@
-/* Full page center */
-.auth-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #2563eb, #1e40af);
-    padding: 20px;
-}
-
-/* Card */
-.auth-card {
+/* Center card */
+.form-card {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 30px;
     background: #fff;
     border-radius: 12px;
-    padding: 40px 30px;
-    width: 100%;
-    max-width: 420px;
-    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
-.auth-card:hover {
-    transform: translateY(-3px);
-}
-
-/* Title */
-.auth-title {
+/* Heading */
+.form-card h2 {
+    font-size: 24px;
     font-weight: 600;
-    color: #1e40af;
+    margin-bottom: 20px;
+    color: #1e3a8a;
 }
 
-/* Form inputs */
-.auth-form .form-control {
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    padding: 10px 14px;
-    font-size: 15px;
-}
-
-.auth-form .form-control:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.2);
-}
-
-/* Button */
-.auth-form .btn {
-    border-radius: 8px;
-    padding: 12px;
-    font-weight: 500;
-    font-size: 16px;
-}
-
-.auth-form .btn-primary {
-    background: #2563eb;
-    border-color: #2563eb;
-    transition: background 0.2s;
-}
-
-.auth-form .btn-primary:hover {
-    background: #1e40af;
-}
-
-/* Alerts */
-.custom-alert {
-    border-radius: 8px;
+/* Labels */
+.form-card label {
+    display: block;
+    text-align: left;
     font-size: 14px;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+/* Inputs */
+.form-card input[type="text"],
+.form-card input[type="email"],
+.form-card input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
     margin-bottom: 15px;
-}
-
-/* Footer */
-.auth-footer {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
     font-size: 14px;
-    color: #374151;
+    outline: none;
+    transition: border 0.2s;
 }
 
-.auth-footer a {
+.form-card input:focus {
+    border-color: #2563eb;
+}
+
+/* Submit button */
+.form-card button {
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.form-card button:hover {
+    background: #1e40af;
+    transform: translateY(-1px);
+}
+
+/* Small link */
+.form-card p {
+    font-size: 13px;
+    margin-top: 15px;
+    color: #6b7280;
+}
+.form-card p a {
     color: #2563eb;
-    font-weight: 500;
     text-decoration: none;
+    font-weight: 500;
 }
-
-.auth-footer a:hover {
+.form-card p a:hover {
     text-decoration: underline;
 }
