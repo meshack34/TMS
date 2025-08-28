@@ -1,10 +1,22 @@
 {% extends "base_dashboard.html" %}
 {% block content %}
-<h3 class="mb-3">Delete Destination</h3>
-<p>Are you sure you want to delete <strong>{{ destination.name }}</strong>?</p>
-<form method="post">
-  {% csrf_token %}
-  <button class="btn btn-danger">Yes, delete</button>
-  <a class="btn btn-outline-secondary" href="{% url 'destination_detail' destination.id %}">Cancel</a>
-</form>
+<div class="container mt-4">
+  <div class="card shadow-sm border-0" style="background:#f8f9fa;">
+    <div class="card-body text-center">
+      <h3 class="mb-3 text-danger">⚠️ Delete Destination</h3>
+      <p class="mb-4">
+        Are you sure you want to delete 
+        <strong class="text-dark">{{ destination.name }}</strong>? <br>
+        This action <span class="fw-bold text-danger">cannot be undone</span>.
+      </p>
+      <form method="post" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger px-4 me-2">Yes, Delete</button>
+      </form>
+      <a href="{% url 'destination_detail' destination.id %}" class="btn btn-outline-secondary px-4">
+        Cancel
+      </a>
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -1,61 +1,77 @@
 {% extends "base_dashboard.html" %}
 {% block content %}
-<h2 class="mb-4">Welcome, {{ user.username }} 👋</h2>
+<div class="container-fluid py-4 bg-light min-vh-100">
 
-{% if bookings %}
-  {% for b in bookings %}
-    <div class="card mb-4">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h5 class="card-title mb-0">
-              Booking #{{ b.id }} — {{ b.client.name }}
-            </h5>
-            <small class="text-muted">
-              {{ b.start_date }} → {{ b.end_date }}
-            </small>
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Welcome, {{ user.username }}</h2>
+    <a href="{% url 'booking_create' %}" class="btn btn-primary">Create a Booking</a>
+  </div>
+
+  {% if bookings %}
+    {% for b in bookings %}
+      <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+
+          <!-- Booking Header -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 class="card-title mb-0">Booking #{{ b.id }} — {{ b.client.name }}</h5>
+              <small class="text-muted">{{ b.start_date }} → {{ b.end_date }}</small>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <a class="btn btn-outline-primary btn-sm" href="{% url 'booking_detail' b.id %}">View Booking</a>
+              <a class="btn btn-success btn-sm" href="{% url 'add_destination' b.id %}">Add Destination</a>
+              <a class="btn btn-outline-secondary btn-sm" href="{% url 'upload_travel_leg' b.id %}">Add Travel Leg</a>
+            </div>
           </div>
-          <div>
-            <a class="btn btn-outline-primary btn-sm" href="{% url 'booking_detail' b.id %}">View Booking</a>
-            <a class="btn btn-success btn-sm" href="{% url 'add_destination' b.id %}">Add Destination</a>
-            <a class="btn btn-outline-secondary btn-sm" href="{% url 'upload_travel_leg' b.id %}">Add Travel Leg</a>
-          </div>
-        </div>
 
-        {% if b.destinations.all %}
-          <hr>
-          <div class="row">
-            {% for dest in b.destinations.all %}
-              <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h5 class="card-title">{{ dest.name }}</h5>
-                    <p class="card-text">
-                      {{ dest.country }}<br>
-                      {{ dest.start_date }} → {{ dest.end_date }}
-                    </p>
-                    <a href="{% url 'destination_detail' dest.id %}" class="btn btn-outline-primary btn-sm">View</a>
-                    <a href="{% url 'edit_destination' dest.id %}" class="btn btn-outline-secondary btn-sm">Edit</a>
-                    <a href="{% url 'delete_destination' dest.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+          <!-- Destinations -->
+          {% if b.destinations.all %}
+            <hr>
+            <div class="row">
+              {% for dest in b.destinations.all %}
+                <div class="col-12 col-md-6 col-lg-4 mb-3">
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                      <h5 class="card-title">{{ dest.name }}</h5>
+                      <p class="card-text text-muted mb-3">
+                        {{ dest.country }}<br>
+                        {{ dest.start_date }} → {{ dest.end_date }}
+                      </p>
 
-                    <hr class="my-2">
-                    <div class="d-flex flex-wrap gap-2">
-                      <a href="{% url 'upload_stay' dest.id %}" class="btn btn-outline-success btn-sm">Add Stay</a>
-                      <a href="{% url 'upload_activity' dest.id %}" class="btn btn-outline-success btn-sm">Add Activity</a>
-                      <a href="{% url 'upload_dining' dest.id %}" class="btn btn-outline-success btn-sm">Add Dining</a>
-                      <a href="{% url 'upload_restaurant' dest.id %}" class="btn btn-outline-info btn-sm">Add Restaurant</a>
+                      <!-- Destination Actions -->
+                      <div class="mb-2 d-flex flex-wrap gap-2">
+                        <a href="{% url 'destination_detail' dest.id %}" class="btn btn-outline-primary btn-sm flex-grow-1">View</a>
+                        <a href="{% url 'edit_destination' dest.id %}" class="btn btn-outline-secondary btn-sm flex-grow-1">Edit</a>
+                        <a href="{% url 'delete_destination' dest.id %}" class="btn btn-outline-danger btn-sm flex-grow-1">Delete</a>
+                      </div>
+
+                      <hr class="my-2">
+
+                      <!-- Add Items -->
+                      <div class="d-flex flex-wrap gap-2 mt-auto">
+                        <a href="{% url 'upload_stay' dest.id %}" class="btn btn-outline-success btn-sm">Add Stay</a>
+                        <a href="{% url 'upload_activity' dest.id %}" class="btn btn-outline-success btn-sm">Add Activity</a>
+                        <a href="{% url 'upload_dining' dest.id %}" class="btn btn-outline-success btn-sm">Add Dining</a>
+                        <a href="{% url 'upload_restaurant' dest.id %}" class="btn btn-outline-info btn-sm">Add Restaurant</a>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+        </div>
       </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-center py-5">
+      <p class="text-muted mb-3">You don’t have any bookings yet.</p>
+      <a href="{% url 'booking_create' %}" class="btn btn-primary btn-lg">Create a Booking</a>
     </div>
-  {% endfor %}
-{% else %}
-  <p>You don’t have any bookings yet.</p>
-  <a href="{% url 'booking_create' %}" class="btn btn-primary">Create a Booking</a>
-{% endif %}
+  {% endif %}
+
+</div>
 {% endblock %}

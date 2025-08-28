@@ -1,21 +1,62 @@
 {% extends "base_dashboard.html" %}
 {% block content %}
-<div class="container my-4">
-    <h2>Create Booking</h2>
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="container">
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">Create Booking</h2>
+      <a href="{% url 'booking_list' %}" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Back to Bookings
+      </a>
+    </div>
 
-    <!-- Link to add client -->
-    <p>
+    <!-- Client Shortcut -->
+    <div class="alert alert-info py-2 px-3 mb-3">
+      <small>
         Not seeing your client? 
-        <a href="{% url 'client_create' %}" target="_blank" class="btn btn-sm btn-outline-primary">
-            Add Client
+        <a href="{% url 'client_create' %}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+          <i class="bi bi-person-plus me-1"></i> Add Client
         </a>
-    </p>
+      </small>
+    </div>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Save Booking</button>
-        <a href="{% url 'booking_list' %}" class="btn btn-secondary">Cancel</a>
-    </form>
+    <!-- Form Section -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+              </label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <!-- Buttons -->
+          <div class="d-flex gap-2 pt-2">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-check-circle me-1"></i> Save Booking
+            </button>
+            <a href="{% url 'booking_list' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll("input, select, textarea").forEach(function(el) {
+    el.classList.add("form-control");
+  });
+});
+</script>
 {% endblock %}

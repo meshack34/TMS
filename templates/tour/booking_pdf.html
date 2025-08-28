@@ -8,61 +8,68 @@
     /* -------- Reset / Base -------- */
     @page { size: A4; margin: 18mm 14mm 18mm 14mm; }
     * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-size: 12px; color: #222; }
-    h1, h2, h3, h4 { margin: 0 0 8px; }
-    h1 { font-size: 20px; }
-    h2 { font-size: 16px; margin-top: 14px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 12px; color: #222;
+    }
+    h1, h2, h3 { margin: 0 0 8px; }
+    h1 { font-size: 20px; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 4px; }
+    h2 { font-size: 16px; margin-top: 14px; color: #0056b3; }
     h3 { font-size: 13px; margin-top: 10px; }
     p { margin: 0 0 6px; }
     .muted { color: #666; }
-    .mb-6 { margin-bottom: 6px; }
-    .mb-10 { margin-bottom: 10px; }
-    .mb-12 { margin-bottom: 12px; }
-    .mb-16 { margin-bottom: 16px; }
-    .mt-16 { margin-top: 16px; }
     .fw-bold { font-weight: 700; }
     .text-right { text-align: right; }
+    .mb-10 { margin-bottom: 10px; }
 
     /* -------- Layout -------- */
     .row { display: flex; gap: 18px; }
     .col-8 { flex: 2 1 0; min-width: 0; }
     .col-4 { flex: 1 1 0; min-width: 0; }
-    .section { break-inside: avoid; }
-
-    /* On narrow pages, stack columns */
-    @media (max-width: 800px) {
-      .row { display: block; }
-      .col-8, .col-4 { width: 100%; }
-    }
+    .section { break-inside: avoid; margin-bottom: 14px; }
 
     /* -------- Tables -------- */
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
     th, td { padding: 6px 8px; border: 1px solid #ddd; vertical-align: top; }
-    thead th { background: #f1f1f1; }
-    .table-sm th, .table-sm td { padding: 4px 6px; }
-    .no-border td, .no-border th { border: 0; padding: 0; }
+    thead th {
+      background: #eaf3ff;
+      color: #0056b3;
+      font-weight: 600;
+    }
+    tbody tr:nth-child(even) { background: #fafafa; }
+    tbody tr.fw-bold td {
+      background: #0056b3;
+      color: #fff;
+      font-weight: 700;
+    }
 
-    /* Ensure long content wraps and doesn’t overflow columns */
-    td, th { word-break: break-word; }
-
-    /* -------- Cards (right column boxes) -------- */
-    .card { border: 1px solid #e5e5e5; border-radius: 6px; padding: 8px; margin-bottom: 10px; }
-    .card-title { text-align: center; font-weight: 600; margin-bottom: 6px; }
+    /* -------- Cards -------- */
+    .card {
+      border: 1px solid #dbe4f3;
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 10px;
+      background: #f9fbff;
+    }
+    .card-title {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #0056b3;
+    }
 
     /* -------- Images -------- */
     .thumb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .thumb { width: 100%; height: 90px; object-fit: cover; border-radius: 4px; }
     .banner { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; }
 
-    /* -------- Page breaks between big sections -------- */
+    /* -------- Page breaks -------- */
     .page-break { page-break-before: always; }
 
-    /* Footer (optional) */
-    .footer { position: running(footer); font-size: 10px; color: #888; }
+    /* Footer */
+    .footer { position: running(footer); font-size: 10px; color: #555; text-align: center; }
     @page {
-      @bottom-center {
-        content: element(footer);
-      }
+      @bottom-center { content: element(footer); }
     }
   </style>
 </head>
@@ -76,8 +83,8 @@
     <!-- LEFT COLUMN -->
     <div class="col-8">
       <h3>Client: {{ booking.client.name }}</h3>
-      <p class="mb-6"><span class="fw-bold">Start Date:</span> {{ booking.start_date }}</p>
-      <p class="mb-12"><span class="fw-bold">End Date:</span> {{ booking.end_date }}</p>
+      <p><span class="fw-bold">Start Date:</span> {{ booking.start_date }}</p>
+      <p class="mb-10"><span class="fw-bold">End Date:</span> {{ booking.end_date }}</p>
 
       <!-- Cost Breakdown -->
       <div class="section">
@@ -100,11 +107,10 @@
       </div>
 
       <!-- Travel Itinerary -->
-      <div class="section mt-16">
+      <div class="section">
         <h2>Travel Itinerary</h2>
-
         {% if travel_legs %}
-        <table class="table-sm">
+        <table>
           <thead>
             <tr>
               <th style="width:70px;">Date</th>
@@ -119,12 +125,8 @@
             <tr>
               <td>{{ leg.date }}</td>
               <td>{{ leg.mode }}</td>
-              <td>
-                {{ leg.from_location }}{% if leg.from_destination %} ({{ leg.from_destination.name }}){% endif %}
-              </td>
-              <td>
-                {{ leg.to_location }}{% if leg.to_destination %} ({{ leg.to_destination.name }}){% endif %}
-              </td>
+              <td>{{ leg.from_location }}{% if leg.from_destination %} ({{ leg.from_destination.name }}){% endif %}</td>
+              <td>{{ leg.to_location }}{% if leg.to_destination %} ({{ leg.to_destination.name }}){% endif %}</td>
               <td class="text-right">${{ leg.cost }}</td>
             </tr>
             {% endfor %}
@@ -162,7 +164,7 @@
       </div>
 
       <!-- Restaurants -->
-      <div class="section mt-16">
+      <div class="section">
         <h2>Restaurants</h2>
         {% with all_dests=destinations %}
           {% for d in all_dests %}

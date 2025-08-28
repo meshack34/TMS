@@ -3,19 +3,60 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 
+<style>
+/* Dashboard polish */
+.card {
+  border-radius: 20px !important;
+  transition: all 0.2s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
+}
+.card-header {
+  font-weight: 600;
+  border-bottom: 1px solid #f0f0f0;
+}
+.stat-icon {
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.table th {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+}
+.table td {
+  font-size: 0.9rem;
+}
+.table-hover tbody tr:hover {
+  background-color: #f9fbff;
+}
+.profile-info p {
+  font-size: 0.95rem;
+}
+</style>
+
 <div class="container-fluid py-4 bg-light min-vh-100">
+
   <!-- Greeting -->
   <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body d-flex justify-content-between align-items-center">
-      <div>
-        <h4 class="fw-bold mb-1">Welcome back, {{ request.user.first_name|default:request.user.username }} 👋</h4>
-        <p class="text-muted mb-0">Here’s a quick overview of your tour management system.</p>
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+      <div class="mb-3 mb-md-0">
+        <h4 class="fw-bold mb-1">
+          Welcome back, {{ request.user.first_name|default:request.user.username }} 👋
+        </h4>
+        <p class="text-muted mb-0">Here’s your quick system overview.</p>
       </div>
       <div>
         {% if profile.profile_picture %}
-          <img src="{{ profile.profile_picture.url }}" class="rounded-circle shadow-sm" width="60" height="60" alt="Profile">
+          <img src="{{ profile.profile_picture.url }}" class="rounded-circle shadow-sm border" width="65" height="65" alt="Profile">
         {% else %}
-          <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+          <div class="bg-primary bg-opacity-25 text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width:65px; height:65px;">
             <i class="bi bi-person fs-2"></i>
           </div>
         {% endif %}
@@ -27,7 +68,7 @@
   <div class="row g-3 mb-4">
     <div class="col-md-3 col-6">
       <div class="card shadow-sm border-0 text-center p-3 h-100">
-        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex p-3 mb-2">
+        <div class="stat-icon bg-primary bg-opacity-10 mb-3">
           <i class="bi bi-people fs-3 text-primary"></i>
         </div>
         <h3 class="fw-bold mb-0">{{ clients_count }}</h3>
@@ -37,7 +78,7 @@
 
     <div class="col-md-3 col-6">
       <div class="card shadow-sm border-0 text-center p-3 h-100">
-        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex p-3 mb-2">
+        <div class="stat-icon bg-success bg-opacity-10 mb-3">
           <i class="bi bi-calendar-check fs-3 text-success"></i>
         </div>
         <h3 class="fw-bold mb-0">{{ bookings_count }}</h3>
@@ -47,7 +88,7 @@
 
     <div class="col-md-3 col-6">
       <div class="card shadow-sm border-0 text-center p-3 h-100">
-        <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex p-3 mb-2">
+        <div class="stat-icon bg-danger bg-opacity-10 mb-3">
           <i class="bi bi-geo-alt fs-3 text-danger"></i>
         </div>
         <h3 class="fw-bold mb-0">{{ destinations_count }}</h3>
@@ -57,7 +98,7 @@
 
     <div class="col-md-3 col-6">
       <div class="card shadow-sm border-0 text-center p-3 h-100">
-        <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex p-3 mb-2">
+        <div class="stat-icon bg-warning bg-opacity-10 mb-3">
           <i class="bi bi-activity fs-3 text-warning"></i>
         </div>
         <h3 class="fw-bold mb-0">{{ activities_count }}</h3>
@@ -70,30 +111,32 @@
     <!-- Recent Bookings -->
     <div class="col-lg-7">
       <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-white fw-bold">Recent Bookings</div>
+        <div class="card-header bg-white">Recent Bookings</div>
         <div class="card-body p-0">
-          <table class="table table-hover mb-0 align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Client</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for booking in recent_bookings %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
                 <tr>
-                  <td>{{ booking.client.name }}</td>
-                  <td>{{ booking.start_date }}</td>
-                  <td>{{ booking.end_date }}</td>
-                  <td>KSH {{ booking.grand_total|floatformat:2 }}</td>
+                  <th>Client</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Total</th>
                 </tr>
-              {% empty %}
-                <tr><td colspan="4" class="text-center text-muted py-3">No bookings yet.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for booking in recent_bookings %}
+                  <tr>
+                    <td>{{ booking.client.name }}</td>
+                    <td>{{ booking.start_date }}</td>
+                    <td>{{ booking.end_date }}</td>
+                    <td class="fw-semibold">KSH {{ booking.grand_total|floatformat:2 }}</td>
+                  </tr>
+                {% empty %}
+                  <tr><td colspan="4" class="text-center text-muted py-3">No bookings yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -101,10 +144,10 @@
     <!-- Quick Profile -->
     <div class="col-lg-5">
       <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-white fw-bold">Your Profile</div>
-        <div class="card-body">
-          <p class="mb-1"><span class="text-muted"><i class="bi bi-person"></i> Username:</span> {{ request.user.username }}</p>
-          <p class="mb-1"><span class="text-muted"><i class="bi bi-building"></i> Company:</span> {{ profile.company_name|default:"—" }}</p>
+        <div class="card-header bg-white">Your Profile</div>
+        <div class="card-body profile-info">
+          <p><span class="text-muted"><i class="bi bi-person"></i> Username:</span> {{ request.user.username }}</p>
+          <p><span class="text-muted"><i class="bi bi-building"></i> Company:</span> {{ profile.company_name|default:"—" }}</p>
           <p class="mb-3"><span class="text-muted"><i class="bi bi-telephone"></i> Phone:</span> {{ profile.phone|default:"—" }}</p>
           <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
         </div>

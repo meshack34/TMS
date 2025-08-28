@@ -72,6 +72,10 @@ body {
   flex-direction: column;
   min-height: 100vh; /* full page height */
   padding: 1rem 0;
+  position: fixed; /* keep sidebar fixed */
+  top: 56px; /* height of top navbar */
+  left: 0;
+  z-index: 1000;
 }
 
 .sidebar .nav-link {
@@ -100,13 +104,32 @@ body {
 
 
 
-
 /* ======================
    MAIN CONTENT AREA
    ====================== */
 .main-content {
   flex: 1;
   padding: 2rem;
+  margin-left: 240px; /* leave space for sidebar */
+  margin-top: 56px;   /* leave space for top navbar */
+}
+
+/* Responsive sidebar behaviour */
+@media (max-width: 767px) {
+  .main-content {
+    margin-left: 0; /* full width when sidebar collapses */
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 56px;
+    left: -240px;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.show {
+    left: 0; /* slide in when toggled */
+  }
 }
 
 
@@ -144,3 +167,19 @@ body {
   font-size: 0.95rem;
 }
 
+/* ======================
+   FOOTER FIX
+   ====================== */
+footer {
+  margin-left: 240px;  /* same as sidebar width */
+  margin-top: auto;    /* push footer to bottom */
+  padding: 1rem;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+@media (max-width: 767px) {
+  footer {
+    margin-left: 0; /* full width on mobile */
+  }
+}

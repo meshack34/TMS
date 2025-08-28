@@ -1,34 +1,274 @@
 {% extends "main.html" %}
-{% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<style>
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
-<div class="auth-container">
-    <div class="auth-card shadow-lg">
-        <h2 class="mb-4 text-center auth-title">Login</h2>
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
 
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+}
 
-        <form method="post" class="auth-form">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" name="username" id="username" class="form-control" required>
-            </div>
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    width: 100%;
+}
 
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" id="password" class="form-control" required>
-            </div>
+.login-card {
+    background: #ffffff;
+    padding: 4rem 3rem;
+    border-radius: 25px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    max-width: 600px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.8s ease-in-out;
+}
 
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Login</button>
-            </div>
-        </form>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px);}
+    to { opacity: 1; transform: translateY(0);}
+}
 
-        <p class="mt-3 text-center auth-footer">
-            Don’t have an account? <a href="{% url 'register' %}">Register here</a>.
-        </p>
-    </div>
+/* Input Groups */
+.form-group {
+    width: 100%;
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.form-control {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    background: #fdfdfd;
+    padding: 15px 45px 15px 45px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    border-color: var(--brand-color, #0069d9);
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0,105,217,0.25);
+    outline: none;
+}
+
+/* Error outline */
+.form-control.error {
+    border-color: #e63946 !important;
+    box-shadow: 0 0 6px rgba(230,57,70,0.4);
+}
+
+/* Floating Labels */
+.form-label {
+    position: absolute;
+    top: 15px;
+    left: 45px;
+    font-size: 1rem;
+    color: #777;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background: #fff;
+    padding: 0 5px;
+}
+
+.form-control:focus ~ .form-label,
+.form-control:not(:placeholder-shown) ~ .form-label {
+    top: -10px;
+    left: 40px;
+    font-size: 0.85rem;
+    color: var(--brand-color, #0069d9);
+}
+
+/* Icons */
+.form-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.3rem;
+    color: #888;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+    font-size: 1.2rem;
+}
+
+/* Button */
+.btn-custom {
+    background-color: var(--brand-color, #0069d9);
+    border: none;
+    height: 55px;
+    font-size: 1.2rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.btn-custom:hover {
+    background-color: var(--brand-dark, #0053aa);
+}
+
+/* Error messages */
+.field-error {
+    color: #e63946;
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+}
+.field-error:empty {
+    display: none; /* hides if no message */
+}
+
+/* Shake animation */
+.shake {
+    animation: shake 0.4s;
+}
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+</style>
+
+<div class="page-wrapper">
+    <main>
+        <div class="login-card" id="loginCard">
+            <h2 class="mb-5 text-center">Login</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" id="loginForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <i class="bi bi-person form-icon"></i>
+                    <input type="text" id="username" name="username" class="form-control" placeholder=" " required>
+                    <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                    <div id="usernameError" class="field-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <i class="bi bi-lock form-icon"></i>
+                    <input type="password" id="password" name="password" class="form-control" placeholder=" " required>
+                    <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                    <i class="bi bi-eye password-toggle" id="togglePassword"></i>
+                    <div id="passwordError" class="field-error"></div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-custom text-white">Login</button>
+                </div>
+            </form>
+
+            <p class="mt-4 text-center">
+                Don’t have an account? <a href="{% url 'register' %}">Register here</a>.
+            </p>
+        </div>
+    </main>
 </div>
+
+<script>
+const togglePassword = document.getElementById('togglePassword');
+const passwordField = document.getElementById('password');
+togglePassword.addEventListener('click', function () {
+    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordField.setAttribute('type', type);
+    this.classList.toggle('bi-eye');
+    this.classList.toggle('bi-eye-slash');
+});
+
+const loginForm = document.getElementById('loginForm');
+const loginCard = document.getElementById('loginCard');
+const username = document.getElementById('username');
+const password = document.getElementById('password');
+const usernameError = document.getElementById('usernameError');
+const passwordError = document.getElementById('passwordError');
+
+function showError(field, errorEl, message) {
+    errorEl.textContent = message;
+    field.classList.add("error");
+}
+function clearError(field, errorEl) {
+    errorEl.textContent = "";
+    field.classList.remove("error");
+}
+
+[username, password].forEach(field => {
+    field.addEventListener("blur", () => {
+        if (!field.value.trim()) {
+            const errorEl = field.id === "username" ? usernameError : passwordError;
+            showError(field, errorEl, field.getAttribute("name") + " is required.");
+        } else {
+            const errorEl = field.id === "username" ? usernameError : passwordError;
+            clearError(field, errorEl);
+        }
+    });
+});
+
+loginForm.addEventListener('submit', function(e) {
+    let valid = true;
+
+    if (!username.value.trim()) {
+        showError(username, usernameError, "Username is required.");
+        valid = false;
+    } else {
+        clearError(username, usernameError);
+    }
+
+    if (!password.value.trim()) {
+        showError(password, passwordError, "Password is required.");
+        valid = false;
+    } else {
+        clearError(password, passwordError);
+    }
+
+    if (!valid) {
+        e.preventDefault();
+        loginCard.classList.add('shake');
+        setTimeout(()=>loginCard.classList.remove('shake'), 400);
+    }
+});
+
+// Clear all errors on page load
+window.addEventListener("DOMContentLoaded", () => {
+    usernameError.textContent = "";
+    passwordError.textContent = "";
+});
+</script>
 {% endblock %}

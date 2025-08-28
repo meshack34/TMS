@@ -5,71 +5,105 @@
 {% block title %}My Profile{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-  <h2 class="mb-4">👤 My Profile</h2>
-
-  <div class="row">
-    <!-- Left column: Profile card -->
-    <div class="col-md-4">
-      <div class="card shadow-lg border-0">
-        <div class="card-body text-center">
-          {% if profile.profile_picture %}
-            <img src="{{ profile.profile_picture.url }}" class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
-          {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
-          {% endif %}
-          <h4>{{ request.user.username }}</h4>
-          <p class="text-muted">{{ request.user.email }}</p>
-          {% if profile.company_name %}
-            <p><i class="bi bi-building"></i> {{ profile.company_name }}</p>
-          {% endif %}
-          {% if profile.phone %}
-            <p><i class="bi bi-telephone"></i> {{ profile.phone }}</p>
-          {% endif %}
-        </div>
-      </div>
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="container">
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0"><i class="bi bi-person-circle me-2"></i> My Profile</h2>
     </div>
 
-    <!-- Right column: Edit form -->
-    <div class="col-md-8">
-      <div class="card shadow-lg border-0">
-        <div class="card-header bg-dark text-white">
-          <h5 class="mb-0">Update Profile</h5>
+    <div class="row g-4">
+      <!-- Left: Profile Summary -->
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header text-center bg-gradient" 
+               style="background: linear-gradient(135deg, #0d6efd, #198754);">
+            {% if profile.profile_picture %}
+              <img src="{{ profile.profile_picture.url }}" 
+                   class="rounded-circle border border-3 border-white shadow mb-2"
+                   width="120" height="120" alt="Profile Picture">
+            {% else %}
+              <img src="{% static 'images/default-avatar.png' %}" 
+                   class="rounded-circle border border-3 border-white shadow mb-2"
+                   width="120" height="120" alt="Profile Picture">
+            {% endif %}
+            <h4 class="text-white mb-0">{{ request.user.username }}</h4>
+            <p class="text-light small">{{ request.user.email }}</p>
+          </div>
+          <div class="card-body text-center">
+            {% if profile.company_name %}
+              <p class="mb-2"><i class="bi bi-building me-1 text-primary"></i> {{ profile.company_name }}</p>
+            {% endif %}
+            {% if profile.phone %}
+              <p class="mb-0"><i class="bi bi-telephone me-1 text-success"></i> {{ profile.phone }}</p>
+            {% endif %}
+          </div>
         </div>
-        <div class="card-body">
-          <form method="POST" enctype="multipart/form-data" class="row g-3">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
+      </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Username</label>
-              <input type="text" class="form-control" value="{{ request.user.username }}" disabled>
-            </div>
+      <!-- Right: Edit Profile Form -->
+      <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Update Profile</h5>
+          </div>
+          <div class="card-body">
+            <form method="POST" enctype="multipart/form-data" class="row g-4">
+              {% csrf_token %}
+              {{ form.non_field_errors }}
 
-            <div class="col-md-6">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" value="{{ request.user.email }}" disabled>
-            </div>
+              <!-- Username (read-only) -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Username</label>
+                <input type="text" class="form-control-plaintext bg-light p-2 rounded" 
+                       value="{{ request.user.username }}" readonly>
+              </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Phone</label>
-              {{ form.phone|add_class:"form-control" }}
-            </div>
+              <!-- Email (read-only) -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email</label>
+                <input type="email" class="form-control-plaintext bg-light p-2 rounded" 
+                       value="{{ request.user.email }}" readonly>
+              </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Company Name</label>
-              {{ form.company_name|add_class:"form-control" }}
-            </div>
+              <!-- Phone -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Phone</label>
+                {{ form.phone|add_class:"form-control shadow-sm" }}
+                {% if form.phone.errors %}
+                  <div class="text-danger small mt-1">{{ form.phone.errors|striptags }}</div>
+                {% endif %}
+              </div>
 
-            <div class="col-md-12">
-              <label class="form-label">Profile Picture</label>
-              {{ form.profile_picture }}
-            </div>
+              <!-- Company Name -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Company Name</label>
+                {{ form.company_name|add_class:"form-control shadow-sm" }}
+                {% if form.company_name.errors %}
+                  <div class="text-danger small mt-1">{{ form.company_name.errors|striptags }}</div>
+                {% endif %}
+              </div>
 
-            <div class="col-12 text-end">
-              <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save Changes</button>
-            </div>
-          </form>
+              <!-- Profile Picture -->
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">Profile Picture</label>
+                <div class="input-group">
+                  {{ form.profile_picture|add_class:"form-control shadow-sm" }}
+                  <label class="input-group-text"><i class="bi bi-upload"></i></label>
+                </div>
+                {% if form.profile_picture.errors %}
+                  <div class="text-danger small mt-1">{{ form.profile_picture.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Save Button -->
+              <div class="col-12 text-end">
+                <button type="submit" class="btn btn-success px-4 shadow-sm">
+                  <i class="bi bi-save me-1"></i> Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

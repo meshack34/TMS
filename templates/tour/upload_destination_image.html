@@ -1,11 +1,59 @@
 {% extends "base_dashboard.html" %}
+{% load widget_tweaks %}
+
 {% block content %}
-<h2>Upload Image for {{ destination.name }}</h2>
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="row justify-content-center">
+    <!-- Wider form column -->
+    <div class="col-12 col-xl-8">
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Upload</button>
-</form>
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Upload Image for {{ destination.name }}</h3>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+      </div>
 
+      <!-- Form Card -->
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+          <form method="POST" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% for field in form %}
+              <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                {{ field|add_class:"form-control" }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% if field.errors %}
+                  <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+
+            <div class="d-flex gap-2 mt-3">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-upload me-1"></i> Upload
+              </button>
+              <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+              </a>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -1,38 +1,187 @@
 {% extends "main.html" %}
-{% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Arial,sans-serif}
+.page-wrapper{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:linear-gradient(135deg,#e2e8f0,#f8fafc)}
+main{display:flex;justify-content:center;align-items:center;flex:1;width:100%}
+.register-card{background:#fff;padding:3.5rem 2.5rem;border-radius:22px;box-shadow:0 15px 30px rgba(0,0,0,0.12);max-width:680px;width:94%;display:flex;flex-direction:column;align-items:center;animation:fadeIn .8s ease-in-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.form-group{width:100%;position:relative;margin-bottom:1.6rem}
+.form-control{width:100%;border-radius:12px;border:1px solid #ccc;background:#fdfdfd;padding:15px 45px 15px 45px;font-size:1rem;transition:all .3s ease;box-sizing:border-box}
+.form-control:focus{border-color:var(--brand-color,#0069d9);background:#fff;box-shadow:0 0 10px rgba(0,105,217,.18);outline:none}
+.form-label{position:absolute;top:15px;left:45px;font-size:1rem;color:#777;pointer-events:none;transition:all .2s ease;background:#fff;padding:0 6px}
+.form-control:focus ~ .form-label,.form-control:not(:placeholder-shown) ~ .form-label{top:-10px;left:40px;font-size:.85rem;color:var(--brand-color,#0069d9)}
+.form-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:#888}
+.password-toggle{position:absolute;right:15px;top:50%;transform:translateY(-50%);cursor:pointer;color:#888;font-size:1.1rem}
+.row-split{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media (max-width:640px){.row-split{grid-template-columns:1fr}.register-card{padding:2.5rem}}
+.btn-custom{background-color:var(--brand-color,#0069d9);border:none;height:55px;font-size:1.05rem;border-radius:12px;transition:all .3s ease;color:white}
+.btn-custom:hover{background-color:var(--brand-dark,#0053aa)}
+.small-note{font-size:.9rem;color:#e3342f;margin-top:.5rem} /* red errors */
+.error-list{background:#ffe9e9;border:1px solid #ffbcbc;padding:.6rem 1rem;border-radius:8px;color:#9b2b2b;margin-bottom:1rem}
+.required-star{color:#e3342f;margin-left:3px}
+</style>
 
-<div class="auth-container">
-    <div class="auth-card shadow-lg">
-        <h2 class="mb-4 text-center auth-title">Planner Registration</h2>
+<div class="page-wrapper">
+    <main>
+        <div class="register-card" id="registerCard">
+            <h2 class="mb-4 text-center">Create an account</h2>
 
-        <form method="post" novalidate class="auth-form">
-            {% csrf_token %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+                {% endfor %}
+            {% endif %}
 
-            {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small">
-                            {% for error in field.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
+            {% if form.non_field_errors %}
+                <div class="error-list">
+                    <ul style="margin:0;padding-left:1.2rem">
+                        {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="post" id="registerForm" novalidate>
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <i class="bi bi-person form-icon"></i>
+                    <input type="text" id="username" name="username" class="form-control" placeholder=" " value="{{ form.username.value|default_if_none:'' }}" required>
+                    <label for="username" class="form-label">Username<span class="required-star">*</span></label>
+                    {% if form.username.errors %}
+                        <div class="small-note">{{ form.username.errors.0 }}</div>
                     {% endif %}
                 </div>
-            {% endfor %}
 
-            <div class="d-grid mt-4">
-                <button type="submit" class="btn btn-primary">Create Planner Account</button>
-            </div>
-        </form>
+                <div class="form-group">
+                    <i class="bi bi-envelope form-icon"></i>
+                    <input type="email" id="email" name="email" class="form-control" placeholder=" " value="{{ form.email.value|default_if_none:'' }}" required>
+                    <label for="email" class="form-label">Email<span class="required-star">*</span></label>
+                    {% if form.email.errors %}
+                        <div class="small-note">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-        <p class="mt-3 text-center auth-footer">
-            Already have an account? <a href="{% url 'login' %}">Log in here</a>.
-        </p>
-    </div>
+                <div class="row-split">
+                    <div class="form-group">
+                        <i class="bi bi-lock form-icon"></i>
+                        <input type="password" id="password1" name="password1" class="form-control" placeholder=" " required>
+                        <label for="password1" class="form-label">Password<span class="required-star">*</span></label>
+                        <i class="bi bi-eye password-toggle" data-target="password1"></i>
+                        {% if form.password1.errors %}
+                            <div class="small-note">{{ form.password1.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <i class="bi bi-lock form-icon"></i>
+                        <input type="password" id="password2" name="password2" class="form-control" placeholder=" " required>
+                        <label for="password2" class="form-label">Confirm password<span class="required-star">*</span></label>
+                        <i class="bi bi-eye password-toggle" data-target="password2"></i>
+                        {% if form.password2.errors %}
+                            <div class="small-note">{{ form.password2.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-grid mt-3 mb-2" style="width:100%">
+                    <button type="submit" class="btn btn-custom text-white">Create account</button>
+                </div>
+
+                <p class="small-note text-center" style="color:#555">By creating an account you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+            </form>
+
+            <p class="mt-3 text-center">Already have an account? <a href="{% url 'login' %}">Login</a>.</p>
+        </div>
+    </main>
 </div>
+
+<script>
+document.querySelectorAll('.password-toggle').forEach(icon=>{
+    icon.addEventListener('click',()=>{
+        const targetId = icon.dataset.target;
+        const field = document.getElementById(targetId);
+        if(!field) return;
+        const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+        field.setAttribute('type', type);
+        icon.classList.toggle('bi-eye');
+        icon.classList.toggle('bi-eye-slash');
+    });
+});
+
+const registerForm = document.getElementById('registerForm');
+const registerCard = document.getElementById('registerCard');
+
+// client-side validation on submit
+registerForm.addEventListener('submit', function(e){
+    const username = document.getElementById('username');
+    const email = document.getElementById('email');
+    const p1 = document.getElementById('password1');
+    const p2 = document.getElementById('password2');
+    let valid = true;
+
+    [username, email, p1, p2].forEach(field => {
+        let error = field.parentNode.querySelector('.field-error');
+        if(!field.value.trim()){
+            valid = false;
+            if(!error){
+                error = document.createElement('div');
+                error.className = 'small-note field-error';
+                error.textContent = field.labels[0].innerText.replace('*','').trim() + ' is required.';
+                field.parentNode.appendChild(error);
+            }
+        } else {
+            if(error) error.remove();
+        }
+    });
+
+    if(p1.value && p2.value && p1.value !== p2.value){
+        valid = false;
+        if(!document.getElementById('pwMismatch')){
+            const note = document.createElement('div');
+            note.id = 'pwMismatch';
+            note.className = 'small-note';
+            note.textContent = 'Passwords do not match.';
+            p2.parentNode.appendChild(note);
+        }
+    } else {
+        const mismatchNote = document.getElementById('pwMismatch');
+        if(mismatchNote) mismatchNote.remove();
+    }
+
+    if(!valid){
+        e.preventDefault();
+        registerCard.classList.add('shake');
+        setTimeout(()=>registerCard.classList.remove('shake'),400);
+    }
+});
+
+// real-time validation on blur
+const requiredFields = [
+  {id: "username", label: "Username"},
+  {id: "email", label: "Email"},
+  {id: "password1", label: "Password"},
+  {id: "password2", label: "Confirm password"}
+];
+
+requiredFields.forEach(f => {
+  const field = document.getElementById(f.id);
+  field.addEventListener("blur", () => {
+    let error = field.parentNode.querySelector(".field-error");
+    if (!field.value.trim()) {
+      if (!error) {
+        error = document.createElement("div");
+        error.className = "small-note field-error";
+        error.textContent = `${f.label} is required.`;
+        field.parentNode.appendChild(error);
+      }
+    } else {
+      if (error) error.remove();
+    }
+  });
+});
+</script>
+
 {% endblock %}

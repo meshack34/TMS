@@ -1,32 +1,99 @@
 {% extends "base_dashboard.html" %}
 {% block content %}
-<div class="container my-4">
-    <h2>Clients</h2>
-    <a href="{% url 'client_create' %}" class="btn btn-primary mb-3">Add Client</a>
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
+
+<style>
+.card {
+  border-radius: 20px !important;
+  transition: all 0.2s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
+}
+.table-hover tbody tr:hover {
+  background-color: #f9fbff;
+}
+.table th {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+}
+.table td {
+  font-size: 0.95rem;
+}
+</style>
+
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h4 class="fw-bold mb-2">Clients</h4>
+        <a href="{% url 'client_create' %}" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i> Add Client
+        </a>
+      </div>
+
+      <!-- Search -->
+      <div class="input-group mb-3" style="max-width: 350px;">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="text" id="clientSearch" class="form-control" placeholder="Search clients...">
+      </div>
+
+      <!-- Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
             <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th style="width:150px;">Actions</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th style="width:150px;">Actions</th>
             </tr>
-        </thead>
-        <tbody>
-        {% for client in clients %}
-            <tr>
-                <td>{{ client.first_name }} {{ client.last_name }}</td>
+          </thead>
+          <tbody id="clientTable">
+            {% for client in clients %}
+              <tr>
+                <td class="fw-semibold">{{ client.first_name }} {{ client.last_name }}</td>
                 <td>{{ client.email }}</td>
                 <td>{{ client.phone_number }}</td>
                 <td>
-                    <a href="{% url 'client_update' client.pk %}" class="btn btn-sm btn-warning">Edit</a>
-                    <a href="{% url 'client_delete' client.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                  <div class="d-flex gap-2">
+                    <a href="{% url 'client_update' client.pk %}" class="btn btn-sm btn-warning">
+                      <i class="bi bi-pencil-square"></i> Edit
+                    </a>
+                    <a href="{% url 'client_delete' client.pk %}" class="btn btn-sm btn-danger">
+                      <i class="bi bi-trash"></i> Delete
+                    </a>
+                  </div>
+
                 </td>
-            </tr>
-        {% empty %}
-            <tr><td colspan="4">No clients found.</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                  <i class="bi bi-people fs-3 d-block mb-2"></i>
+                  No clients found.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+// Simple client search filter
+document.getElementById('clientSearch').addEventListener('keyup', function() {
+  let filter = this.value.toLowerCase();
+  let rows = document.querySelectorAll('#clientTable tr');
+  rows.forEach(row => {
+    let text = row.textContent.toLowerCase();
+    row.style.display = text.includes(filter) ? '' : 'none';
+  });
+});
+</script>
+
 {% endblock %}
