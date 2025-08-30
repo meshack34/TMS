@@ -1,0 +1,42 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Subscribe to {{ subscription.get_plan_display }}</h2>
+    <p><strong>Fee:</strong> KSH {{ subscription.fee }}</p>
+    <p><strong>Duration:</strong> 30 days</p>
+
+    <!-- PayPal Button Container -->
+    <div id="paypal-button-container"></div>
+
+    <a href="{% url 'subscription_cancel' subscription.id %}" class="btn btn-danger mt-3">Cancel</a>
+</div>
+
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=USD"></script>
+
+<script>
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: '{{ subscription.fee }}'
+                    },
+                    description: 'Subscription Plan: {{ subscription.get_plan_display }}'
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                // Redirect to success URL after approval
+                window.location.href = "{% url 'subscription_success' subscription.id %}";
+            });
+        },
+        onCancel: function (data) {
+            window.location.href = "{% url 'subscription_cancel' subscription.id %}";
+        }
+    }).render('#paypal-button-container');
+</script>
+{% endblock %}

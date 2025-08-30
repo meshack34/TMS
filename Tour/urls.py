@@ -51,4 +51,10 @@ urlpatterns = [
     path("planners/<int:profile_id>/subscriptions/", views.subscription_list, name="subscription_list"),
     path("planners/<int:profile_id>/subscriptions/add/", views.subscription_create, name="subscription_create"),
     path("subscriptions/<int:pk>/edit/", views.subscription_edit, name="subscription_edit"),
+    path("planner/<int:profile_id>/plans/", views.subscription_plans, name="subscription_plans"),
+    
+    path("planner/<int:profile_id>/subscribe/<str:plan>/", views.subscription_checkout, name="subscription_checkout"),
+    path("subscription/<int:sub_id>/success/", views.subscription_success, name="subscription_success"),
+    path("subscription/<int:sub_id>/cancel/", views.subscription_cancel, name="subscription_cancel"),
+
 ]

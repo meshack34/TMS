@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Choose Your Subscription Plan</h2>
+
+    <div class="row">
+        {% for plan in plans %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm text-center">
+                <div class="card-header">
+                    <h4 class="my-0">{{ plan.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title">KSH {{ plan.price }}</h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        {% for feature in plan.features %}
+                        <li>{{ feature }}</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'subscription_checkout' profile.id plan.key %}" 
+                       class="btn btn-primary">Choose {{ plan.name }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
