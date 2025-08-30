@@ -192,13 +192,22 @@ class Subscription(models.Model):
     fee = models.DecimalField(max_digits=10, decimal_places=2)
     start_date = models.DateField(default=timezone.now)
     end_date = models.DateField()
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
+
+    # New fields for PayPal tracking
+    transaction_id = models.CharField(max_length=255, blank=True, null=True)
+    payment_status = models.CharField(
+        max_length=50,
+        choices=[("pending", "Pending"), ("completed", "Completed"), ("failed", "Failed")],
+        default="pending",
+    )
 
     def __str__(self):
-        return f"{self.profile.user.username} - {self.plan} ({'Active' if self.is_active else 'Expired'})"
+        return f"{self.profile.user.username} - {self.plan} ({self.payment_status})"
 
     def status(self):
         today = timezone.now().date()
         if self.end_date < today:
             return "Expired"
-        return "Active"
+        return "Active" if self.is_active else self.payment_status.capitalize()
+

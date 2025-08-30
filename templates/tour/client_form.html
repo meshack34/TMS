@@ -18,7 +18,7 @@
 
           <!-- First / Last Name -->
           <div class="col-md-6">
-            <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">First Name</label>
+            <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
             {{ form.first_name }}
             {% if form.first_name.errors %}
               <div class="text-danger small mt-1">{{ form.first_name.errors|striptags }}</div>
@@ -26,7 +26,7 @@
           </div>
 
           <div class="col-md-6">
-            <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">Last Name</label>
+            <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">Last Name<span class="text-danger">*</span></label>
             {{ form.last_name }}
             {% if form.last_name.errors %}
               <div class="text-danger small mt-1">{{ form.last_name.errors|striptags }}</div>
@@ -44,7 +44,7 @@
 
           <!-- Phone -->
           <div class="col-md-6">
-            <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-semibold">Phone</label>
+            <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-semibold">Phone <span class="text-danger">*</span> </label>
             {{ form.phone_number }}
             {% if form.phone_number.errors %}
               <div class="text-danger small mt-1">{{ form.phone_number.errors|striptags }}</div>

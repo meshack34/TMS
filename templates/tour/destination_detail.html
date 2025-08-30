@@ -56,7 +56,7 @@
         <!-- Overview -->
         <div class="tab-pane fade show active" id="overview" role="tabpanel">
           <div class="small">
-            <p class="mb-2"><strong>Restaurants (names only):</strong></p>
+            <!-- <p class="mb-2"><strong>Restaurants (names only):</strong></p>
             {% if destination.restaurants.all %}
               <ul>
                 {% for r in destination.restaurants.all %}
@@ -67,14 +67,15 @@
               </ul>
             {% else %}
               <p class="text-muted">No restaurants yet.</p>
-            {% endif %}
+            {% endif %} -->
 
             <div class="d-flex flex-wrap gap-2 mt-3">
               <a href="{% url 'upload_destination_image' destination.id %}" class="btn btn-outline-success btn-sm">Add Image</a>
+              <a href="{% url 'upload_restaurant' destination.id %}" class="btn btn-outline-success btn-sm">Add Restaurant</a>
               <a href="{% url 'upload_stay' destination.id %}" class="btn btn-outline-success btn-sm">Add Stay</a>
               <a href="{% url 'upload_activity' destination.id %}" class="btn btn-outline-success btn-sm">Add Activity</a>
               <a href="{% url 'upload_dining' destination.id %}" class="btn btn-outline-success btn-sm">Add Dining</a>
-              <a href="{% url 'upload_restaurant' destination.id %}" class="btn btn-outline-info btn-sm">Add Restaurant</a>
+              
             </div>
           </div>
         </div>

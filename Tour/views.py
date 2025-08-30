@@ -680,3 +680,66 @@ def subscription_edit(request, pk):
         form = SubscriptionForm(instance=subscription)
 
     return render(request, "tour/subscription_form.html", {"form": form, "profile": subscription.profile})
+
+import datetime
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.utils import timezone
+from .models import Profile, Subscription
+
+# Existing views like planner_list(), subscription_list() remain the same
+
+
+@login_required
+def subscription_checkout(request, profile_id, plan):
+    """Show PayPal checkout for a selected plan"""
+    profile = get_object_or_404(Profile, id=profile_id)
+
+    fees = {"basic": 500, "pro": 1500, "enterprise": 5000}  # KSH example
+    if plan not in fees:
+        messages.error(request, "Invalid plan selected.")
+        return redirect("planner_list")
+
+    fee = fees[plan]
+
+    # Create subscription (pending)
+    subscription = Subscription.objects.create(
+        profile=profile,
+        plan=plan,
+        fee=fee,
+        start_date=timezone.now().date(),
+        end_date=timezone.now().date() + datetime.timedelta(days=30),
+        is_active=False,
+        payment_status="pending",
+    )
+
+    context = {
+        "profile": profile,
+        "subscription": subscription,
+        "paypal_client_id": "YOUR_PAYPAL_CLIENT_ID",  # replace with real one
+    }
+    return render(request, "tour/subscription_checkout.html", context)
+
+
+@login_required
+def subscription_success(request, sub_id):
+    """Mark subscription as active after successful PayPal payment"""
+    subscription = get_object_or_404(Subscription, id=sub_id)
+    subscription.is_active = True
+    subscription.payment_status = "completed"
+    subscription.save()
+
+    messages.success(request, f"Payment successful! {subscription.plan} subscription activated.")
+    return redirect("subscription_list", profile_id=subscription.profile.id)
+
+
+@login_required
+def subscription_cancel(request, sub_id):
+    """Handle canceled PayPal payment"""
+    subscription = get_object_or_404(Subscription, id=sub_id)
+    subscription.payment_status = "failed"
+    subscription.save()
+
+    messages.error(request, "Payment was canceled.")
+    return redirect("subscription_list", profile_id=subscription.profile.id)
