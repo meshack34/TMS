@@ -681,21 +681,6 @@ def subscription_edit(request, pk):
 
     return render(request, "tour/subscription_form.html", {"form": form, "profile": subscription.profile})
 
-
-
-@login_required
-def subscription_plans(request, profile_id):
-    profile = get_object_or_404(Profile, id=profile_id)
-
-    plans = [
-        {"key": "basic", "name": "Basic", "price": 500, "features": ["1 Project", "Email Support"]},
-        {"key": "pro", "name": "Pro", "price": 1500, "features": ["5 Projects", "Priority Support", "Analytics"]},
-        {"key": "enterprise", "name": "Enterprise", "price": 5000, "features": ["Unlimited Projects", "24/7 Support", "Advanced Reports"]},
-    ]
-
-    return render(request, "tour/subscription_plans.html", {"profile": profile, "plans": plans})
-
-
 import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
