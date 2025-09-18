@@ -159,3 +159,14 @@ class SubscriptionForm(forms.ModelForm):
     class Meta:
         model = Subscription
         fields = ["plan", "fee", "start_date", "end_date", "is_active"]
+
+
+from django import forms
+from .models import Subscription
+
+class AdminSubscriptionForm(forms.ModelForm):
+    extend_days = forms.IntegerField(required=False, min_value=1, help_text="Add days to end date", label="Extend by (days)")
+
+    class Meta:
+        model = Subscription
+        fields = ['plan', 'fee', 'end_date', 'is_active', 'payment_status', 'transaction_id']

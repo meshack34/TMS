@@ -1,0 +1,54 @@
+{% extends "base_dashboard.html" %}
+{% block content %}
+<h1>Admin Dashboard — Planners</h1>
+
+<form method="get" style="margin-bottom:1rem;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by username, email or company" />
+  <button type="submit">Search</button>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>User</th><th>Email</th><th>Company</th><th>Latest Plan</th><th>Status / Ends</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for profile in profiles %}
+      {% with latest=profile.subscriptions.all.0 %}
+      <tr>
+        <td>{{ profile.user.username }}</td>
+        <td>{{ profile.user.email }}</td>
+        <td>{{ profile.company_name|default:"—" }}</td>
+        <td>{% if latest %}{{ latest.plan }}{% else %}—{% endif %}</td>
+        <td>
+            {% if latest %}
+                {{ latest.status }} — {{ latest.end_date }}
+            {% else %}
+                No subscription
+            {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'admin_planner_detail' profile.id %}">View</a>
+          {% if latest %}
+            <a href="{% url 'admin_subscription_edit' latest.id %}">Edit</a>
+            <form method="post" action="{% url 'admin_subscription_toggle' latest.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit">{% if latest.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endwith %}
+    {% empty %}
+      <tr><td colspan="6">No planners found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="pagination">
+  {% if profiles.has_previous %}<a href="?page={{ profiles.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Previous</a>{% endif %}
+  Page {{ profiles.number }} of {{ profiles.paginator.num_pages }}
+  {% if profiles.has_next %}<a href="?page={{ profiles.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Next</a>{% endif %}
+</div>
+{% endblock %}

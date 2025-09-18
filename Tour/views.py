@@ -17,7 +17,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from django.shortcuts import render
@@ -39,6 +38,12 @@ from .forms import (
     ClientForm, BookingForm, DestinationForm, DestinationImageForm,
     ActivityForm, StayForm, DiningExpenseForm, RestaurantForm, TravelLegForm
 )
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator
+from django.db.models import Prefetch, Q
+from datetime import timedelta
+from .models import Profile, Subscription
+from .forms import AdminSubscriptionForm
 
 # ---------- Public ----------
 def home(request):
@@ -739,3 +744,63 @@ def subscription_cancel(request, sub_id):
 
     messages.error(request, "Payment was canceled.")
     return redirect("subscription_list", profile_id=subscription.profile.id)
+
+
+@staff_member_required
+def admin_dashboard(request):
+    """List planners with their latest subscription (staff-only)."""
+    q = request.GET.get("q", "").strip()
+
+    # prefetch subscriptions ordered by start_date desc (so .all.0 is latest)
+    subs_prefetch = Prefetch('subscriptions', queryset=Subscription.objects.order_by('-start_date'))
+    profiles_qs = Profile.objects.select_related('user').prefetch_related(subs_prefetch)
+
+    if q:
+        profiles_qs = profiles_qs.filter(
+            Q(user__username__icontains=q) |
+            Q(user__email__icontains=q) |
+            Q(company_name__icontains=q)
+        )
+
+    paginator = Paginator(profiles_qs, 25)
+    page = request.GET.get('page')
+    profiles = paginator.get_page(page)
+
+    return render(request, "tour/admin_dashboard.html", {"profiles": profiles, "q": q})
+
+
+@staff_member_required
+def admin_planner_detail(request, profile_id):
+    profile = get_object_or_404(Profile.objects.select_related('user').prefetch_related('subscriptions'), pk=profile_id)
+    return render(request, "tour/admin_planner_detail.html", {"profile": profile})
+
+
+@staff_member_required
+def admin_subscription_edit(request, sub_id):
+    subscription = get_object_or_404(Subscription, pk=sub_id)
+    if request.method == "POST":
+        form = AdminSubscriptionForm(request.POST, instance=subscription)
+        if form.is_valid():
+            extend_days = form.cleaned_data.get("extend_days") or 0
+            sub = form.save(commit=False)
+            if extend_days:
+                sub.end_date = sub.end_date + timedelta(days=extend_days)
+            sub.save()
+            messages.success(request, "Subscription updated.")
+            return redirect("admin_dashboard")
+    else:
+        form = AdminSubscriptionForm(instance=subscription)
+    return render(request, "tour/admin_subscription_edit.html", {"form": form, "subscription": subscription})
+
+
+@staff_member_required
+def admin_subscription_toggle(request, sub_id):
+    subscription = get_object_or_404(Subscription, pk=sub_id)
+    if request.method == "POST":
+        subscription.is_active = not subscription.is_active
+        # optionally set payment_status when activating
+        if subscription.is_active:
+            subscription.payment_status = "completed"
+        subscription.save()
+        messages.success(request, f"Subscription {'activated' if subscription.is_active else 'deactivated'}.")
+    return redirect("admin_dashboard")

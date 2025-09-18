@@ -56,4 +56,11 @@ urlpatterns = [
     path("planner/<int:profile_id>/subscribe/<str:plan>/", views.subscription_checkout, name="subscription_checkout"),
     path("subscription/<int:sub_id>/success/", views.subscription_success, name="subscription_success"),
     path("subscription/<int:sub_id>/cancel/", views.subscription_cancel, name="subscription_cancel"),
+
+    path("admin-dashboard/", views.admin_dashboard, name="admin_dashboard"),
+    path("admin/planner/<int:profile_id>/", views.admin_planner_detail, name="admin_planner_detail"),
+    path("admin/subscription/<int:sub_id>/edit/", views.admin_subscription_edit, name="admin_subscription_edit"),
+    path("admin/subscription/<int:sub_id>/toggle/", views.admin_subscription_toggle, name="admin_subscription_toggle"),
+
+
 ]

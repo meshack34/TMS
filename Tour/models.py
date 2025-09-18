@@ -55,7 +55,9 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
     else:
-        instance.profile.save()
+        # ensure a profile exists, then save
+        profile, _ = Profile.objects.get_or_create(user=instance)
+        profile.save()
 
 
 class Booking(models.Model):
@@ -205,9 +207,22 @@ class Subscription(models.Model):
     def __str__(self):
         return f"{self.profile.user.username} - {self.plan} ({self.payment_status})"
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['profile', 'start_date']),
+            models.Index(fields=['end_date']),
+            models.Index(fields=['transaction_id']),
+        ]
+        ordering = ['-start_date']
+
+    @property
+    def is_expired(self):
+        return self.end_date < timezone.now().date()
+
     def status(self):
         today = timezone.now().date()
         if self.end_date < today:
             return "Expired"
         return "Active" if self.is_active else self.payment_status.capitalize()
 
+  

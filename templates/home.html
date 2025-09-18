@@ -2,196 +2,422 @@
 {% block content %}
 
 <style>
-body { font-family: Verdana, sans-serif; background-color: #e6f7ff; color: #333; line-height:1.8; font-size:16px; margin:0; padding:0; }
-h1,h2,h3 { margin:0; }
-h1 { font-size:48px; color:#004d80; }
-h2 { color:#004d80; font-size:38px; font-weight:bold; margin-bottom:20px; }
-p { color:#333; line-height:1.8; }
-a { text-decoration:none; }
+  body {
+    font-family: Verdana, sans-serif;
+    background-color: #e6f7ff;
+    color: #333;
+    line-height: 1.8;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+  }
 
-/* Hero Section */
-#home {
-  background: linear-gradient(rgba(230,247,255,0.7), rgba(230,247,255,0.7)),
-              url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
-  min-height: 70vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:0 20px;
-}
-#home p { font-size:22px; max-width:700px; margin-bottom:30px; }
-#home a {
-  background:#ffffff; color:#004d80; padding:14px 30px; border-radius:8px; border:1px solid #004d80; font-size:18px; transition: all 0.3s ease;
-}
-#home a:hover { background:#004d80; color:#fff; }
+  h1, h2, h3 {
+    margin: 0;
+  }
 
-/* Features Section */
-#features { background:#f0fbff; padding:80px 50px; text-align:center; border-radius:14px; }
-#features p { max-width:700px; margin:0 auto 40px auto; font-size:18px; }
-.features-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:30px; margin-top:40px; }
-.feature-card { background:#fff; border-radius:16px; padding:30px 20px; box-shadow:0 6px 18px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; text-align:center; }
-.feature-card:hover { transform:translateY(-10px); box-shadow:0 12px 28px rgba(0,0,0,0.12); }
-.feature-card i { font-size:36px; color:#004d80; margin-bottom:15px; }
-.feature-card h3 { font-size:20px; margin-bottom:10px; }
-.feature-card p { font-size:16px; line-height:1.6; }
+  h1 {
+    font-size: 48px;
+    color: #004d80;
+  }
 
-/* Testimonials Section */
-#testimonials { padding:80px 20px; background:#fff; text-align:center; position:relative; }
-#testimonials h2 { margin-bottom:50px; }
+  h2 {
+    color: #004d80;
+    font-size: 38px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
 
-.testimonial-carousel-container { position: relative; max-width:960px; margin:0 auto; overflow:hidden; }
-.testimonial-wrapper {
-  display:flex;
-  transition: transform 0.5s ease;
-}
-.testimonial-card {
-  min-width:33.3333%;
-  margin:0 10px;
-  background:#f9f9f9;
-  border-radius:14px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.1);
-  padding:20px;
-  text-align:center;
-  opacity:0.5;
-  transform: scale(0.9);
-  transition: transform 0.5s ease, opacity 0.5s ease;
-}
-.testimonial-card.center {
-  transform: scale(1.05);
-  opacity:1;
-  z-index:2;
-}
-.testimonial-card.left, .testimonial-card.right { opacity:0.7; transform: scale(0.95); z-index:1; }
-.testimonial-card img { width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:10px; }
-.testimonial-card strong { color:#004d80; display:block; margin-bottom:2px; }
-.testimonial-card span { font-size:14px; color:#666; }
-.testimonial-card p { font-size:18px; margin-bottom:20px; }
+  p {
+    color: #333;
+    line-height: 1.8;
+  }
 
-/* Carousel arrows */
-.carousel-btn {
-  background: rgba(0, 77, 128, 0.8);
-  border-radius: 50%;
-  border: none;
-  font-size: 28px;
-  color: #fff;
-  cursor: pointer;
-  padding: 10px 14px;
-  transition: all 0.3s ease;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 100; /* ensure above cards */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-.carousel-btn:hover { background: #004d80; }
-.carousel-btn.prev { left: 10px; }
-.carousel-btn.next { right: 10px; }
+  a {
+    text-decoration: none;
+  }
 
-@media(max-width:768px){
-  .testimonial-card { min-width:80%; }
-  .carousel-btn.prev { left: 5px; }
-  .carousel-btn.next { right: 5px; }
-}
+  /* Hero Section */
+  #home {
+    background: linear-gradient(rgba(49, 49, 49, 0.45), rgba(49, 48, 48, 0.45)),
+      url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px;
+    color: #fff;
+  }
+
+  #home h1 {
+    color: #fff;
+  }
+
+  #home p {
+    font-size: 22px;
+    max-width: 700px;
+    margin-bottom: 30px;
+    color: #f1f1f1;
+  }
+
+  #home a {
+    background: #ffffff;
+    color: #004d80;
+    padding: 14px 30px;
+    border-radius: 8px;
+    border: 1px solid #004d80;
+    font-size: 18px;
+    transition: all 0.3s ease;
+  }
+
+  #home a:hover {
+    background: #004d80;
+    color: #fff;
+  }
+
+  /* Features Section */
+  #features {
+    background: #f0fbff;
+    padding: 80px 50px;
+    text-align: center;
+    border-radius: 14px;
+  }
+
+  #features p {
+    max-width: 700px;
+    margin: 0 auto 40px auto;
+    font-size: 18px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+  }
+
+  .feature-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+  }
+
+  .feature-card i {
+    font-size: 36px;
+    color: #004d80;
+    margin-bottom: 15px;
+  }
+
+  .feature-card h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .feature-card p {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Testimonials Section */
+  #testimonials {
+    padding: 80px 20px;
+    background: #fff;
+    text-align: center;
+    position: relative;
+  }
+
+  #testimonials h2 {
+    margin-bottom: 50px;
+  }
+
+  .testimonial-carousel-container {
+    position: relative;
+    max-width: 960px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .testimonial-wrapper {
+    display: flex;
+  }
+
+  .testimonial-card {
+    min-width: 33.3333%;
+    margin: 0 10px;
+    background: #f9f9f9;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    padding: 20px;
+    text-align: center;
+    opacity: 0.5;
+    transform: scale(0.9);
+    transition: transform 0.5s ease, opacity 0.5s ease;
+  }
+
+  .testimonial-card.center {
+    transform: scale(1.05);
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .testimonial-card.left,
+  .testimonial-card.right {
+    opacity: 0.7;
+    transform: scale(0.95);
+    z-index: 1;
+  }
+
+  .testimonial-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+
+  .testimonial-card strong {
+    color: #004d80;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .testimonial-card span {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .testimonial-card p {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  /* Carousel arrows */
+  .carousel-btn {
+    background: rgba(0, 77, 128, 0.8);
+    border-radius: 50%;
+    border: none;
+    font-size: 28px;
+    color: #fff;
+    cursor: pointer;
+    padding: 10px 14px;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .carousel-btn:hover {
+    background: #004d80;
+  }
+
+  .carousel-btn.prev {
+    left: 10px;
+  }
+
+  .carousel-btn.next {
+    right: 10px;
+  }
+
+  @media(max-width:768px){
+    .testimonial-card {
+      min-width: 100%;
+      margin: 0;
+    }
+
+    .testimonial-card.left,
+    .testimonial-card.right {
+      display: none;
+    }
+
+    .carousel-btn.prev { left: 5px; }
+    .carousel-btn.next { right: 5px; }
+  }
 </style>
 
 <main>
-<!-- Hero Section -->
-<section id="home">
-  <h1>Africa's Leading Tour Management System</h1>
-  <p>Plan, organize, and enjoy seamless travel experiences with <strong>Nomad</strong>.</p>
-  <a href="{% url 'login'%}">Get Started</a>
-</section>
+  <!-- Hero Section -->
+  <section id="home">
+    <h1>Africa's Leading Tour Management System</h1>
+    <p>Plan, organize, and enjoy seamless travel experiences with <strong>Nomad</strong>.</p>
+    <a href="{% url 'login'%}">Get Started</a>
+  </section>
 
-<!-- Features Section -->
+  <!-- Features Section -->
 <section id="features">
-  <h2>Why Choose Nomad?</h2>
-  <p>Nomad Tour Management System simplifies travel planning by combining efficiency, innovation, and user-friendly tools that meet every professional travel need.</p>
+  <h2 class="fw-bold"></i> Why Choose Nomad?</h2>
+  <p>
+    Nomad Tour Management System simplifies travel planning by combining efficiency,
+    innovation, and user-friendly tools that meet every professional travel need.
+  </p>
+
   <div class="features-grid">
-    <div class="feature-card"><i class="fas fa-clock"></i><h3>Save Time</h3><p>Centralized platform to organize and manage tours efficiently.</p></div>
-    <div class="feature-card"><i class="fas fa-chart-line"></i><h3>Track Progress</h3><p>Monitor your tours and performance easily.</p></div>
-    <div class="feature-card"><i class="fas fa-users"></i><h3>Collaborate Seamlessly</h3><p>Stay connected with clients and team members effortlessly.</p></div>
-    <div class="feature-card"><i class="fas fa-check-circle"></i><h3>Reliable & Accurate</h3><p>Manage itineraries and schedules with confidence.</p></div>
+    <div class="feature-card">
+      <i class="bi bi-clock-history display-5 text-primary mb-3"></i>
+      <h3 class="fw-bold">Save Time</h3>
+      <p>Centralized platform to organize and manage tours efficiently.</p>
+    </div>
+
+    <div class="feature-card">
+      <i class="bi bi-graph-up-arrow display-5 text-success mb-3"></i>
+      <h3 class="fw-bold">Track Progress</h3>
+      <p>Monitor your tours and performance easily.</p>
+    </div>
+
+    <div class="feature-card">
+      <i class="bi bi-people-fill display-5 text-info mb-3"></i>
+      <h3 class="fw-bold">Collaborate Seamlessly</h3>
+      <p>Stay connected with clients and team members effortlessly.</p>
+    </div>
+
+    <div class="feature-card">
+      <i class="bi bi-shield-check display-5 text-warning mb-3"></i>
+      <h3 class="fw-bold">Reliable & Accurate</h3>
+      <p>Manage itineraries and schedules with confidence.</p>
+    </div>
   </div>
 </section>
 
-<!-- Testimonials Section -->
-<section id="testimonials">
-  <h2>What Our Clients Say</h2>
-  <div class="testimonial-carousel-container">
-    <button class="carousel-btn prev">&#10094;</button>
-    <div class="testimonial-wrapper">
-      <div class="testimonial-card"><img src="https://randomuser.me/api/portraits/men/75.jpg"><p>"Nomad made planning my trips effortless and enjoyable!"</p><strong>John Doe</strong><span>Travel Enthusiast</span></div>
-      <div class="testimonial-card"><img src="https://randomuser.me/api/portraits/women/65.jpg"><p>"The system is intuitive and reliable – I love it!"</p><strong>Fatima Adebayo</strong><span>Tour Operator</span></div>
-      <div class="testimonial-card"><img src="https://randomuser.me/api/portraits/men/32.jpg"><p>"Everything is organized in one place – saves me so much time!"</p><strong>Kwame Mensah</strong><span>Frequent Traveler</span></div>
-      <div class="testimonial-card"><img src="https://randomuser.me/api/portraits/women/42.jpg"><p>"Seamless communication and detailed itineraries make this platform amazing."</p><strong>Aisha Khan</strong><span>Adventure Blogger</span></div>
-      <div class="testimonial-card"><img src="https://randomuser.me/api/portraits/men/56.jpg"><p>"Nomad simplified our tour management like never before!"</p><strong>David Okoye</strong><span>Travel Coordinator</span></div>
+
+  <!-- Testimonials Section -->
+  <section id="testimonials">
+    <h2>What Our Clients Say</h2>
+    <div class="testimonial-carousel-container">
+      <button class="carousel-btn prev">&#10094;</button>
+      <div class="testimonial-wrapper">
+        <div class="testimonial-card">
+          <img src="https://randomuser.me/api/portraits/men/75.jpg">
+          <p>"Nomad made planning my trips effortless and enjoyable!"</p>
+          <strong>John Doe</strong><span>Travel Enthusiast</span>
+        </div>
+        <div class="testimonial-card">
+          <img src="https://randomuser.me/api/portraits/women/65.jpg">
+          <p>"The system is intuitive and reliable – I love it!"</p>
+          <strong>Fatima Adebayo</strong><span>Tour Operator</span>
+        </div>
+        <div class="testimonial-card">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg">
+          <p>"Everything is organized in one place – saves me so much time!"</p>
+          <strong>Kwame Mensah</strong><span>Frequent Traveler</span>
+        </div>
+        <div class="testimonial-card">
+          <img src="https://randomuser.me/api/portraits/women/42.jpg">
+          <p>"Seamless communication and detailed itineraries make this platform amazing."</p>
+          <strong>Aisha Khan</strong><span>Adventure Blogger</span>
+        </div>
+        <div class="testimonial-card">
+          <img src="https://randomuser.me/api/portraits/men/56.jpg">
+          <p>"Nomad simplified our tour management like never before!"</p>
+          <strong>David Okoye</strong><span>Travel Coordinator</span>
+        </div>
+      </div>
+      <button class="carousel-btn next">&#10095;</button>
     </div>
-    <button class="carousel-btn next">&#10095;</button>
-  </div>
-</section>
+  </section>
 </main>
 
 <script>
-const wrapper = document.querySelector('.testimonial-wrapper');
-const prevBtn = document.querySelector('.carousel-btn.prev');
-const nextBtn = document.querySelector('.carousel-btn.next');
+  const wrapper = document.querySelector('.testimonial-wrapper');
+  const prevBtn = document.querySelector('.carousel-btn.prev');
+  const nextBtn = document.querySelector('.carousel-btn.next');
 
-const autoSlideInterval = 5000;
+  const autoSlideInterval = 5000;
+  let isAnimating = false;
 
-// Highlight center card
-function updateHighlight() {
-  const cards = Array.from(wrapper.children);
-  cards.forEach(c => c.classList.remove('left','center','right'));
-  cards[0].classList.add('left');
-  cards[1].classList.add('center');
-  cards[2].classList.add('right');
-}
+  // Detect screen size
+  function isSmallScreen() {
+    return window.innerWidth <= 768;
+  }
 
-// Move carousel forward seamlessly
-function next() {
-  wrapper.appendChild(wrapper.firstElementChild);
-  wrapper.style.transition = 'none';
-  wrapper.style.transform = 'translateX(-33.3333%)';
-  requestAnimationFrame(()=>{
-    wrapper.style.transition = 'transform 0.5s ease';
-    wrapper.style.transform = 'translateX(0)';
+  // Highlight center card
+  function updateHighlight() {
+    const cards = Array.from(wrapper.children);
+    cards.forEach(c => c.classList.remove('left','center','right'));
+    
+    if (isSmallScreen()) {
+      cards[0].classList.add('center');
+    } else {
+      cards[0].classList.add('left');
+      cards[1].classList.add('center');
+      cards[2].classList.add('right');
+    }
+  }
+
+  // Move forward with smooth slide
+  function next() {
+    if (isAnimating) return;
+    isAnimating = true;
+
+    const shift = isSmallScreen() ? '-100%' : '-33.3333%';
+    wrapper.style.transition = 'transform 0.6s ease';
+    wrapper.style.transform = `translateX(${shift})`;
+
+    wrapper.addEventListener('transitionend', () => {
+      wrapper.appendChild(wrapper.firstElementChild);
+      wrapper.style.transition = 'none';
+      wrapper.style.transform = 'translateX(0)';
+      updateHighlight();
+      isAnimating = false;
+    }, { once: true });
+  }
+
+  // Move backward with smooth slide
+  function prev() {
+    if (isAnimating) return;
+    isAnimating = true;
+
+    wrapper.insertBefore(wrapper.lastElementChild, wrapper.firstElementChild);
+    wrapper.style.transition = 'none';
+    wrapper.style.transform = isSmallScreen() ? 'translateX(-100%)' : 'translateX(-33.3333%)';
+
+    requestAnimationFrame(() => {
+      wrapper.style.transition = 'transform 0.6s ease';
+      wrapper.style.transform = 'translateX(0)';
+    });
+
+    wrapper.addEventListener('transitionend', () => {
+      updateHighlight();
+      isAnimating = false;
+    }, { once: true });
+  }
+
+  nextBtn.addEventListener('click', () => { next(); resetAutoSlide(); });
+  prevBtn.addEventListener('click', () => { prev(); resetAutoSlide(); });
+
+  let autoSlide = setInterval(next, autoSlideInterval);
+  function resetAutoSlide() {
+    clearInterval(autoSlide);
+    autoSlide = setInterval(next, autoSlideInterval);
+  }
+
+  // Touch swipe
+  let startX = 0, isDragging = false;
+  wrapper.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX; 
+    isDragging = true;
   });
-  updateHighlight();
-}
-
-// Move carousel backward seamlessly
-function prev() {
-  wrapper.insertBefore(wrapper.lastElementChild, wrapper.firstElementChild);
-  wrapper.style.transition = 'none';
-  wrapper.style.transform = 'translateX(-33.3333%)';
-  requestAnimationFrame(()=>{
-    wrapper.style.transition = 'transform 0.5s ease';
-    wrapper.style.transform = 'translateX(0)';
+  wrapper.addEventListener('touchend', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    let endX = e.changedTouches[0].clientX;
+    if (endX - startX > 50) prev();
+    else if (startX - endX > 50) next();
   });
+
+  // Initial highlight + update on resize
   updateHighlight();
-}
-
-nextBtn.addEventListener('click',()=>{ next(); resetAutoSlide(); });
-prevBtn.addEventListener('click',()=>{ prev(); resetAutoSlide(); });
-
-let autoSlide = setInterval(next, autoSlideInterval);
-function resetAutoSlide() { clearInterval(autoSlide); autoSlide = setInterval(next, autoSlideInterval); }
-
-// Touch swipe
-let startX=0,isDragging=false;
-wrapper.addEventListener('touchstart',e=>{startX=e.touches[0].clientX; isDragging=true;});
-wrapper.addEventListener('touchend',e=>{
-  if(!isDragging) return;
-  isDragging=false;
-  let endX = e.changedTouches[0].clientX;
-  if(endX - startX > 50) prev();
-  else if(startX - endX > 50) next();
-});
-
-// Initial highlight
-updateHighlight();
+  window.addEventListener('resize', updateHighlight);
 </script>
 
 {% endblock %}
