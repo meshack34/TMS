@@ -216,12 +216,8 @@ class BookingDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         booking: Booking = ctx["booking"]
-
-        # existing
         ctx["costs"] = booking.cost_breakdown()
         ctx["destinations"] = booking.destinations.all().order_by("start_date")
-
-        # NEW: ordered legs + summary
         legs = booking.travel_legs.all().select_related(
             "from_destination", "to_destination"
         ).order_by("date", "id")
