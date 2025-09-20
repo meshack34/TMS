@@ -645,113 +645,155 @@ def subscription_list(request, profile_id):
     profile = get_object_or_404(Profile, id=profile_id)
     subscriptions = profile.subscriptions.order_by("-start_date")
     return render(request, "tour/subscription_list.html", {"profile": profile, "subscriptions": subscriptions})
+import datetime
+from datetime import date, timedelta
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
+from django.utils import timezone
+from django.core.paginator import Paginator
+from django.db.models import Q, Prefetch
+from django.urls import reverse
+
+import paypalrestsdk
+from django.conf import settings
+
+from .models import Profile, Subscription
+from .forms import SubscriptionForm, AdminSubscriptionForm
+
+# ========================
+# PayPal SDK Configuration
+# ========================
+paypalrestsdk.configure({
+    "mode": settings.PAYPAL_MODE,  # "sandbox" or "live"
+    "client_id": settings.PAYPAL_CLIENT_ID,
+    "client_secret": settings.PAYPAL_CLIENT_SECRET,
+})
+
+
+# ========================
+# USER (Planner) VIEWS
+# ========================
+
+@login_required
+def my_subscriptions(request):
+    """Show logged-in planner’s subscriptions"""
+    profile = request.user.profile
+    subs = profile.subscriptions.all()
+    return render(request, "subscriptions/my_subscriptions.html", {"subscriptions": subs})
 
 
 @login_required
-def subscription_create(request, profile_id):
-    """Add a new subscription to a planner"""
-    profile = get_object_or_404(Profile, id=profile_id)
-
+def my_subscription_create(request):
+    """Planner creates a new subscription (pending until paid & admin-approved)"""
+    profile = request.user.profile
     if request.method == "POST":
         form = SubscriptionForm(request.POST)
         if form.is_valid():
             subscription = form.save(commit=False)
             subscription.profile = profile
+            subscription.status = "Pending"
+            subscription.payment_status = "pending"
             subscription.save()
-            messages.success(request, "Subscription created successfully.")
-            return redirect("subscription_list", profile_id=profile.id)
+            messages.success(request, "Subscription created. Please proceed with payment.")
+            return redirect("create_payment", subscription_id=subscription.id)
     else:
         form = SubscriptionForm()
-
-    return render(request, "tour/subscription_form.html", {"form": form, "profile": profile})
+    return render(request, "subscriptions/my_subscription_form.html", {"form": form})
 
 
 @login_required
-def subscription_edit(request, pk):
-    """Edit an existing subscription"""
-    subscription = get_object_or_404(Subscription, pk=pk)
-
+def my_subscription_edit(request, pk):
+    """Edit subscription before payment"""
+    profile = request.user.profile
+    subscription = get_object_or_404(Subscription, pk=pk, profile=profile, payment_status="pending")
     if request.method == "POST":
         form = SubscriptionForm(request.POST, instance=subscription)
         if form.is_valid():
             form.save()
-            messages.success(request, "Subscription updated successfully.")
-            return redirect("subscription_list", profile_id=subscription.profile.id)
+            return redirect("my_subscriptions")
     else:
         form = SubscriptionForm(instance=subscription)
+    return render(request, "subscriptions/my_subscription_form.html", {"form": form})
 
-    return render(request, "tour/subscription_form.html", {"form": form, "profile": subscription.profile})
 
-import datetime
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils import timezone
-from .models import Profile, Subscription
+# ========================
+# PAYPAL VIEWS
+# ========================
 
-# Existing views like planner_list(), subscription_list() remain the same
+@login_required
+def create_payment(request, subscription_id):
+    """Start PayPal payment for subscription"""
+    subscription = get_object_or_404(Subscription, id=subscription_id, profile=request.user.profile)
+    request.session["subscription_id"] = subscription.id
+
+    payment = paypalrestsdk.Payment({
+        "intent": "sale",
+        "payer": {"payment_method": "paypal"},
+        "redirect_urls": {
+            "return_url": request.build_absolute_uri(reverse("execute_payment")),
+            "cancel_url": request.build_absolute_uri(reverse("my_subscriptions")),
+        },
+        "transactions": [{
+            "item_list": {
+                "items": [{
+                    "name": subscription.plan,
+                    "sku": f"sub_{subscription.id}",
+                    "price": str(subscription.fee),
+                    "currency": "USD",   # ⚠️ update if supporting KES with conversion
+                    "quantity": 1
+                }]
+            },
+            "amount": {
+                "total": str(subscription.fee),
+                "currency": "USD"
+            },
+            "description": f"Subscription payment for {subscription.plan}"
+        }]
+    })
+
+    if payment.create():
+        subscription.transaction_id = payment.id
+        subscription.save()
+        for link in payment.links:
+            if link.rel == "approval_url":
+                return redirect(link.href)
+    else:
+        return render(request, "subscriptions/payment_error.html", {"error": payment.error})
 
 
 @login_required
-def subscription_checkout(request, profile_id, plan):
-    """Show PayPal checkout for a selected plan"""
-    profile = get_object_or_404(Profile, id=profile_id)
+def execute_payment(request):
+    """Finalize PayPal payment and mark subscription as paid (but still Pending until admin approves)"""
+    payment_id = request.GET.get("paymentId")
+    payer_id = request.GET.get("PayerID")
 
-    fees = {"basic": 500, "pro": 1500, "enterprise": 5000}  # KSH example
-    if plan not in fees:
-        messages.error(request, "Invalid plan selected.")
-        return redirect("planner_list")
+    payment = paypalrestsdk.Payment.find(payment_id)
 
-    fee = fees[plan]
+    if payment.execute({"payer_id": payer_id}):
+        subscription_id = request.session.get("subscription_id")
+        subscription = Subscription.objects.get(id=subscription_id)
 
-    # Create subscription (pending)
-    subscription = Subscription.objects.create(
-        profile=profile,
-        plan=plan,
-        fee=fee,
-        start_date=timezone.now().date(),
-        end_date=timezone.now().date() + datetime.timedelta(days=30),
-        is_active=False,
-        payment_status="pending",
-    )
+        subscription.payment_status = "completed"
+        subscription.save()
 
-    context = {
-        "profile": profile,
-        "subscription": subscription,
-        "paypal_client_id": "YOUR_PAYPAL_CLIENT_ID",  # replace with real one
-    }
-    return render(request, "tour/subscription_checkout.html", context)
+        messages.success(request, "Payment successful! Awaiting admin approval.")
+        return render(request, "subscriptions/payment_success.html", {"subscription": subscription})
+    else:
+        return render(request, "subscriptions/payment_error.html", {"error": payment.error})
 
 
-@login_required
-def subscription_success(request, sub_id):
-    """Mark subscription as active after successful PayPal payment"""
-    subscription = get_object_or_404(Subscription, id=sub_id)
-    subscription.is_active = True
-    subscription.payment_status = "completed"
-    subscription.save()
-
-    messages.success(request, f"Payment successful! {subscription.plan} subscription activated.")
-    return redirect("subscription_list", profile_id=subscription.profile.id)
-
-
-@login_required
-def subscription_cancel(request, sub_id):
-    """Handle canceled PayPal payment"""
-    subscription = get_object_or_404(Subscription, id=sub_id)
-    subscription.payment_status = "failed"
-    subscription.save()
-
-    messages.error(request, "Payment was canceled.")
-    return redirect("subscription_list", profile_id=subscription.profile.id)
-
+# ========================
+# ADMIN VIEWS
+# ========================
 
 @staff_member_required
 def admin_dashboard(request):
     """List planners with their latest subscription (staff-only)."""
     q = request.GET.get("q", "").strip()
 
-    # prefetch subscriptions ordered by start_date desc (so .all.0 is latest)
     subs_prefetch = Prefetch('subscriptions', queryset=Subscription.objects.order_by('-start_date'))
     profiles_qs = Profile.objects.select_related('user').prefetch_related(subs_prefetch)
 
@@ -771,12 +813,14 @@ def admin_dashboard(request):
 
 @staff_member_required
 def admin_planner_detail(request, profile_id):
+    """Detail view of planner with subscriptions"""
     profile = get_object_or_404(Profile.objects.select_related('user').prefetch_related('subscriptions'), pk=profile_id)
     return render(request, "tour/admin_planner_detail.html", {"profile": profile})
 
 
 @staff_member_required
 def admin_subscription_edit(request, sub_id):
+    """Admin edit/extend subscription"""
     subscription = get_object_or_404(Subscription, pk=sub_id)
     if request.method == "POST":
         form = AdminSubscriptionForm(request.POST, instance=subscription)
@@ -784,7 +828,7 @@ def admin_subscription_edit(request, sub_id):
             extend_days = form.cleaned_data.get("extend_days") or 0
             sub = form.save(commit=False)
             if extend_days:
-                sub.end_date = sub.end_date + timedelta(days=extend_days)
+                sub.end_date = (sub.end_date or date.today()) + timedelta(days=extend_days)
             sub.save()
             messages.success(request, "Subscription updated.")
             return redirect("admin_dashboard")
@@ -795,12 +839,17 @@ def admin_subscription_edit(request, sub_id):
 
 @staff_member_required
 def admin_subscription_toggle(request, sub_id):
+    """Admin approves / deactivates subscription"""
     subscription = get_object_or_404(Subscription, pk=sub_id)
     if request.method == "POST":
-        subscription.is_active = not subscription.is_active
-        # optionally set payment_status when activating
-        if subscription.is_active:
-            subscription.payment_status = "completed"
+        if subscription.status == "Pending" and subscription.payment_status == "completed":
+            # Approve subscription
+            subscription.status = "Active"
+            subscription.start_date = date.today()
+            subscription.end_date = date.today() + timedelta(days=30)
+        else:
+            # Toggle deactivation
+            subscription.status = "Expired"
         subscription.save()
-        messages.success(request, f"Subscription {'activated' if subscription.is_active else 'deactivated'}.")
+        messages.success(request, f"Subscription status updated: {subscription.status}")
     return redirect("admin_dashboard")

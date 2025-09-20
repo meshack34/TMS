@@ -1,0 +1,36 @@
+{% extends "base_dashboard.html" %}
+{% block title %}My Subscriptions{% endblock %}
+{% block content %}
+<h2>My Subscriptions</h2>
+<a href="{% url 'my_subscription_create' %}" class="btn btn-primary mb-3">New Subscription</a>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Plan</th>
+      <th>Fee</th>
+      <th>Status</th>
+      <th>Payment</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sub in subscriptions %}
+    <tr>
+      <td>{{ sub.plan }}</td>
+      <td>{{ sub.fee }} USD</td>
+      <td>{{ sub.status }}</td>
+      <td>{{ sub.payment_status }}</td>
+      <td>
+        {% if sub.payment_status == "pending" %}
+          <a href="{% url 'create_payment' sub.id %}" class="btn btn-success btn-sm">Pay Now</a>
+          <a href="{% url 'my_subscription_edit' sub.id %}" class="btn btn-secondary btn-sm">Edit</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No subscriptions found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

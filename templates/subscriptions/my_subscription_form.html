@@ -1,0 +1,10 @@
+{% extends "base_dashboard.html" %}
+{% block title %}New Subscription{% endblock %}
+{% block content %}
+<h2>Subscription Form</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary">Save</button>
+</form>
+{% endblock %}

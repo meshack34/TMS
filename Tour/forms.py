@@ -155,18 +155,31 @@ class ProfileForm(forms.ModelForm):
 from django import forms
 from .models import Subscription
 
+
+from django import forms
+from .models import Subscription
+
 class SubscriptionForm(forms.ModelForm):
     class Meta:
         model = Subscription
-        fields = ["plan", "fee", "start_date", "end_date", "is_active"]
-
+        fields = ["plan", "fee", "start_date", "end_date"]
+        widgets = {
+            "start_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "end_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "fee": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+        }
 
 from django import forms
 from .models import Subscription
 
 class AdminSubscriptionForm(forms.ModelForm):
-    extend_days = forms.IntegerField(required=False, min_value=1, help_text="Add days to end date", label="Extend by (days)")
+    extend_days = forms.IntegerField(
+        required=False,
+        min_value=1,
+        help_text="Add days to end date",
+        label="Extend by (days)"
+    )
 
     class Meta:
         model = Subscription
-        fields = ['plan', 'fee', 'end_date', 'is_active', 'payment_status', 'transaction_id']
+        fields = ['plan', 'fee', 'end_date', 'status', 'payment_status', 'transaction_id']
