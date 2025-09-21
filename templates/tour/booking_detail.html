@@ -1,147 +1,176 @@
 {% extends "base_dashboard.html" %}
+{% block title %}Booking #{{ booking.id }} Details{% endblock %}
 {% block content %}
-<div class="container my-4">
+
+<div class="container-fluid py-4 bg-light min-vh-100">
+
   <!-- Page Title -->
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
+    <h4 class="fw-bold mb-0">
       <i class="bi bi-journal-bookmark-fill text-primary me-2"></i> 
       Booking #{{ booking.id }} Details
-    </h2>
-    <a href="{% url 'booking_list' %}" class="btn btn-outline-secondary btn-sm">
+    </h4>
+    <a href="{% url 'booking_list' %}" class="btn btn-outline-secondary btn-sm shadow-sm">
       <i class="bi bi-arrow-left me-1"></i> Back to Bookings
     </a>
   </div>
 
-  <div class="row g-4">
-    <!-- LEFT COLUMN (Main Info) -->
-    <div class="col-md-8">
-      <!-- Client & Dates -->
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-          <h4 class="card-title mb-3">Client Information</h4>
-          <p><strong>Client:</strong> {{ booking.client.first_name }} {{ booking.client.last_name }}</p>
-          <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
-          <p><strong>End Date:</strong> {{ booking.end_date }}</p>
-          <a href="{% url 'add_destination' booking.pk %}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Add Destination
-          </a>
+  <!-- Wrap all content for PDF -->
+  <div id="booking-report">
+
+    <div class="row g-4">
+      <!-- LEFT COLUMN -->
+      <div class="col-lg-8">
+        <!-- Client Info -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-white fw-semibold">Client Information</div>
+          <div class="card-body">
+            <p><span class="text-muted"><i class="bi bi-person me-1"></i> Client:</span> 
+               {{ booking.client.first_name }} {{ booking.client.last_name }}</p>
+            <p><span class="text-muted"><i class="bi bi-calendar me-1"></i> Start:</span> {{ booking.start_date }}</p>
+            <p><span class="text-muted"><i class="bi bi-calendar-check me-1"></i> End:</span> {{ booking.end_date }}</p>
+            <a href="{% url 'add_destination' booking.pk %}" class="btn btn-primary btn-sm">
+              <i class="bi bi-plus-circle me-1"></i> Add Destination
+            </a>
+          </div>
+        </div>
+
+        <!-- Cost Breakdown -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-white fw-semibold">Cost Breakdown</div>
+          <div class="card-body p-0">
+            {% with breakdown=booking.cost_breakdown %}
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Category</th>
+                  <th class="text-end">Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Accommodation</td><td class="text-end">KSH {{ breakdown.Accommodation }}</td></tr>
+                <tr><td>Activities</td><td class="text-end">KSH {{ breakdown.Activities }}</td></tr>
+                <tr><td>Dining</td><td class="text-end">KSH {{ breakdown.Dining }}</td></tr>
+                <tr><td>Transport</td><td class="text-end">KSH {{ breakdown.Transport }}</td></tr>
+                <tr class="fw-bold table-primary"><td>Total</td><td class="text-end">KSH {{ breakdown.Total }}</td></tr>
+              </tbody>
+            </table>
+            {% endwith %}
+          </div>
+        </div>
+
+        <!-- Travel Itinerary -->
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white fw-semibold">Travel Destination Summary</div>
+          <div class="card-body p-0">
+            <table class="table table-striped table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Mode</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th class="text-end">Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for leg in travel_legs %}
+                <tr>
+                  <td>{{ leg.date }}</td>
+                  <td>{{ leg.mode }}</td>
+                  <td>{{ leg.from_location }}{% if leg.from_destination %} ({{ leg.from_destination.name }}){% endif %}</td>
+                  <td>{{ leg.to_location }}{% if leg.to_destination %} ({{ leg.to_destination.name }}){% endif %}</td>
+                  <td class="text-end">KSH {{ leg.cost }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-3">No travel legs added yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Cost Breakdown -->
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-          <h4 class="card-title mb-3">💰 Cost Breakdown</h4>
-          {% with breakdown=booking.cost_breakdown %}
-          <table class="table table-sm table-hover align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Category</th>
-                <th class="text-end">Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Accommodation</td><td class="text-end">KSH {{ breakdown.Accommodation }}</td></tr>
-              <tr><td>Activities</td><td class="text-end">KSH {{ breakdown.Activities }}</td></tr>
-              <tr><td>Dining</td><td class="text-end">KSH {{ breakdown.Dining }}</td></tr>
-              <tr><td>Transport</td><td class="text-end">KSH {{ breakdown.Transport }}</td></tr>
-              <tr class="fw-bold table-primary"><td>Total</td><td class="text-end">KSH {{ breakdown.Total }}</td></tr>
-            </tbody>
-          </table>
-          {% endwith %}
-        </div>
-      </div>
-
-      <!-- Travel Itinerary -->
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <h4 class="card-title mb-3">🛫 Travel Destination Summary</h4>
-          <table class="table table-striped table-sm align-middle">
-            <thead>
-              <tr>
-                <th>Date</th><th>Mode</th><th>From</th><th>To</th><th class="text-end">Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for leg in travel_legs %}
-              <tr>
-                <td>{{ leg.date }}</td>
-                <td>{{ leg.mode }}</td>
-                <td>{{ leg.from_location }}{% if leg.from_destination %} ({{ leg.from_destination.name }}){% endif %}</td>
-                <td>{{ leg.to_location }}{% if leg.to_destination %} ({{ leg.to_destination.name }}){% endif %}</td>
-                <td class="text-end">KSH {{ leg.cost }}</td>
-              </tr>
-              {% empty %}
-              <tr><td colspan="5" class="text-center text-muted">No travel legs added yet.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT COLUMN (Destinations & Restaurants) -->
-    <div class="col-md-4">
-      <!-- Destinations -->
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-          <h4 class="card-title mb-3">📍 Destinations</h4>
-          {% for d in booking.destinations.all %}
-            <div class="card mb-3 border-0 shadow-sm">
-              <div class="card-body p-2">
-                <h6 class="card-title mb-2 text-center fw-semibold">{{ d.name }}</h6>
-                <div class="row g-2">
-                  {% for g in d.galleries.all|slice:":3" %}
-                    <div class="col-4">
-                      <img src="{{ g.image.url }}" class="img-fluid rounded"
-                           style="height:100px; width:100%; object-fit:cover;" alt="{{ d.name }}">
-                    </div>
-                  {% empty %}
-                    <div class="col-12">
+      <!-- RIGHT COLUMN -->
+      <div class="col-lg-4">
+        <!-- Destinations -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-white fw-semibold">Destinations</div>
+          <div class="card-body">
+            {% for d in booking.destinations.all %}
+              <div class="card mb-3 border-0 shadow-sm">
+                <div class="card-body p-2">
+                  <h6 class="card-title text-center fw-semibold mb-2">{{ d.name }}</h6>
+                  <div class="row g-2">
+                    {% for g in d.galleries.all|slice:":3" %}
+                      <div class="col-4">
+                        <img src="{{ g.image.url }}" class="img-fluid rounded shadow-sm"
+                             style="height:100px; width:100%; object-fit:cover;" alt="{{ d.name }}">
+                      </div>
+                    {% empty %}
                       <p class="text-muted small mb-0">No images uploaded.</p>
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-          {% empty %}
-            <p class="text-muted">No destinations added yet.</p>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Restaurants -->
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <h4 class="card-title mb-3">🍴 Restaurants</h4>
-          {% with all_dests=booking.destinations.all %}
-            {% for d in all_dests %}
-              {% for r in d.restaurants.all %}
-                <div class="card mb-3 shadow-sm border-0">
-                  {% if r.image %}
-                    <img src="{{ r.image.url }}" class="card-img-top"
-                         style="height:150px; object-fit:cover;" alt="{{ r.name }}">
-                  {% endif %}
-                  <div class="card-body py-2 text-center">
-                    <div class="fw-semibold small">{{ r.name }}</div>
-                    <div class="text-muted small">{{ d.name }}</div>
+                    {% endfor %}
                   </div>
                 </div>
-              {% empty %}
-                <p class="text-muted">No restaurants added yet.</p>
-              {% endfor %}
+              </div>
+            {% empty %}
+              <p class="text-muted mb-0">No destinations added yet.</p>
             {% endfor %}
-          {% endwith %}
+          </div>
+        </div>
+
+        <!-- Restaurants -->
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white fw-semibold">Restaurants</div>
+          <div class="card-body">
+            {% with all_dests=booking.destinations.all %}
+              {% for d in all_dests %}
+                {% for r in d.restaurants.all %}
+                  <div class="card mb-3 shadow-sm border-0">
+                    {% if r.image %}
+                      <img src="{{ r.image.url }}" class="card-img-top"
+                           style="height:150px; object-fit:cover;" alt="{{ r.name }}">
+                    {% endif %}
+                    <div class="card-body py-2 text-center">
+                      <div class="fw-semibold small">{{ r.name }}</div>
+                      <div class="text-muted small">{{ d.name }}</div>
+                    </div>
+                  </div>
+                {% empty %}
+                  <p class="text-muted mb-0">No restaurants added yet.</p>
+                {% endfor %}
+              {% endfor %}
+            {% endwith %}
+          </div>
         </div>
       </div>
     </div>
-  </div>
+
+  </div> <!-- /booking-report -->
 
   <!-- Action Buttons -->
   <div class="mt-4 d-flex gap-2">
-    <a href="{% url 'booking_pdf' booking.pk %}" class="btn btn-success" target="_blank">
+    <!-- Old backend link removed -->
+    <button id="download" class="btn btn-success shadow-sm">
       <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
-    </a>
+    </button>
   </div>
 </div>
+
+<!-- html2pdf.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+document.getElementById("download").addEventListener("click", () => {
+  const element = document.getElementById("booking-report");
+  const opt = {
+    margin:       0.5,
+    filename:     "booking_{{ booking.id }}.pdf",
+    image:        { type: "jpeg", quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: "in", format: "a4", orientation: "portrait" }
+  };
+  html2pdf().set(opt).from(element).save();
+});
+</script>
+
 {% endblock %}
