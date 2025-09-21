@@ -6,22 +6,108 @@
 html,body{height:100%;margin:0;font-family:Arial,sans-serif}
 .page-wrapper{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:linear-gradient(135deg,#e2e8f0,#f8fafc)}
 main{display:flex;justify-content:center;align-items:center;flex:1;width:100%}
-.register-card{background:#fff;padding:3.5rem 2.5rem;border-radius:22px;box-shadow:0 15px 30px rgba(0,0,0,0.12);max-width:680px;width:94%;display:flex;flex-direction:column;align-items:center;animation:fadeIn .8s ease-in-out}
+
+/* Register Card */
+.register-card{
+    background:#fff;
+    padding:3.5rem 2.5rem;
+    border-radius:22px;
+    box-shadow:0 6px 20px rgba(0,77,128,0.35); /* darker blue shadow */
+    max-width:680px;
+    width:94%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    animation:fadeIn .8s ease-in-out;
+    transition:transform .3s ease, box-shadow .3s ease;
+}
+.register-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 10px 30px rgba(0,77,128,0.55); /* stronger on hover */
+}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* Form Controls */
 .form-group{width:100%;position:relative;margin-bottom:1.6rem}
-.form-control{width:100%;border-radius:12px;border:1px solid #ccc;background:#fdfdfd;padding:15px 45px 15px 45px;font-size:1rem;transition:all .3s ease;box-sizing:border-box}
-.form-control:focus{border-color:var(--brand-color,#0069d9);background:#fff;box-shadow:0 0 10px rgba(0,105,217,.18);outline:none}
-.form-label{position:absolute;top:15px;left:45px;font-size:1rem;color:#777;pointer-events:none;transition:all .2s ease;background:#fff;padding:0 6px}
-.form-control:focus ~ .form-label,.form-control:not(:placeholder-shown) ~ .form-label{top:-10px;left:40px;font-size:.85rem;color:var(--brand-color,#0069d9)}
+.form-control{
+    width:100%;
+    border-radius:12px;
+    border:1px solid #ccc;
+    background:#fdfdfd;
+    padding:15px 45px;
+    font-size:1rem;
+    transition:all .3s ease;
+    box-sizing:border-box;
+}
+.form-control:focus{
+    border-color:var(--brand-color,#0069d9);
+    background:#fff;
+    box-shadow:0 0 10px rgba(0,105,217,.25);
+    outline:none;
+}
+.form-label{
+    position:absolute;
+    top:15px;
+    left:45px;
+    font-size:1rem;
+    color:#777;
+    pointer-events:none;
+    transition:all .2s ease;
+    background:#fff;
+    padding:0 6px;
+}
+.form-control:focus ~ .form-label,
+.form-control:not(:placeholder-shown) ~ .form-label{
+    top:-10px;
+    left:40px;
+    font-size:.85rem;
+    color:var(--brand-color,#0069d9);
+}
+
+/* Icons */
 .form-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:#888}
 .password-toggle{position:absolute;right:15px;top:50%;transform:translateY(-50%);cursor:pointer;color:#888;font-size:1.1rem}
+
+/* Split layout */
 .row-split{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-@media (max-width:640px){.row-split{grid-template-columns:1fr}.register-card{padding:2.5rem}}
-.btn-custom{background-color:var(--brand-color,#0069d9);border:none;height:55px;font-size:1.05rem;border-radius:12px;transition:all .3s ease;color:white}
+@media (max-width:640px){
+    .row-split{grid-template-columns:1fr}
+    .register-card{padding:2.5rem}
+}
+
+/* Buttons */
+.btn-custom{
+    background-color:var(--brand-color,#0069d9);
+    border:none;
+    height:55px;
+    font-size:1.05rem;
+    border-radius:12px;
+    transition:all .3s ease;
+    color:white;
+}
 .btn-custom:hover{background-color:var(--brand-dark,#0053aa)}
-.small-note{font-size:.9rem;color:#e3342f;margin-top:.5rem} /* red errors */
-.error-list{background:#ffe9e9;border:1px solid #ffbcbc;padding:.6rem 1rem;border-radius:8px;color:#9b2b2b;margin-bottom:1rem}
+
+/* Errors */
+.small-note{font-size:.9rem;color:#e3342f;margin-top:.5rem}
+.error-list{
+    background:#ffe9e9;
+    border:1px solid #ffbcbc;
+    padding:.6rem 1rem;
+    border-radius:8px;
+    color:#9b2b2b;
+    margin-bottom:1rem;
+}
 .required-star{color:#e3342f;margin-left:3px}
+
+/* Shake animation */
+.shake{animation:shake .4s}
+@keyframes shake{
+    0%{transform:translateX(0)}
+    25%{transform:translateX(-5px)}
+    50%{transform:translateX(5px)}
+    75%{transform:translateX(-5px)}
+    100%{transform:translateX(0)}
+}
 </style>
 
 <div class="page-wrapper">
@@ -114,7 +200,6 @@ document.querySelectorAll('.password-toggle').forEach(icon=>{
 const registerForm = document.getElementById('registerForm');
 const registerCard = document.getElementById('registerCard');
 
-// client-side validation on submit
 registerForm.addEventListener('submit', function(e){
     const username = document.getElementById('username');
     const email = document.getElementById('email');
@@ -158,7 +243,7 @@ registerForm.addEventListener('submit', function(e){
     }
 });
 
-// real-time validation on blur
+// Blur validation
 const requiredFields = [
   {id: "username", label: "Username"},
   {id: "email", label: "Email"},
@@ -183,5 +268,4 @@ requiredFields.forEach(f => {
   });
 });
 </script>
-
 {% endblock %}

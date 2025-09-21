@@ -1,33 +1,72 @@
 {% extends "base_dashboard.html" %}
 {% block content %}
-<h2>Subscriptions for {{ profile.user.username }}</h2>
-<a href="{% url 'subscription_create' profile.id %}" class="btn btn-success mb-2">Add Subscription</a>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Plan</th>
-            <th>Fee</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for sub in subscriptions %}
-        <tr>
-            <td>{{ sub.plan }}</td>
-            <td>{{ sub.fee }}</td>
-            <td>{{ sub.start_date }}</td>
-            <td>{{ sub.end_date }}</td>
-            <td>{{ sub.status }}</td>
-            <td>
-                <a href="{% url 'subscription_edit' sub.id %}" class="btn btn-sm btn-warning">Edit</a>
-            </td>
-        </tr>
-    {% empty %}
-        <tr><td colspan="6">No subscriptions yet.</td></tr>
-    {% endfor %}
-    </tbody>
-</table>
+
+<div class="container-fluid py-4 bg-light min-vh-100">
+
+  <!-- Page Header -->
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+      <h4 class="fw-bold mb-0">
+        <i class="bi bi-credit-card-fill text-primary me-2"></i> 
+        Subscriptions for {{ profile.user.username }}
+      </h4>
+      <a href="{% url 'subscription_create' profile.id %}" class="btn btn-success btn-sm">
+        <i class="bi bi-plus-circle me-1"></i> Add Subscription
+      </a>
+    </div>
+  </div>
+
+  <!-- Subscriptions Table -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Plan</th>
+              <th>Fee</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sub in subscriptions %}
+              <tr>
+                <td class="fw-semibold">{{ sub.plan }}</td>
+                <td>KSH {{ sub.fee }}</td>
+                <td>{{ sub.start_date }}</td>
+                <td>{{ sub.end_date }}</td>
+                <td>
+                  {% if sub.status == "Active" %}
+                    <span class="badge bg-success">{{ sub.status }}</span>
+                  {% elif sub.status == "Expired" %}
+                    <span class="badge bg-danger">{{ sub.status }}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ sub.status }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <a href="{% url 'subscription_edit' sub.id %}" 
+                     class="btn btn-sm btn-outline-warning">
+                    <i class="bi bi-pencil-square me-1"></i> Edit
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                  No subscriptions yet.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 {% endblock %}

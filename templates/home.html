@@ -3,34 +3,35 @@
 
 <style>
   body {
-    font-family: Verdana, sans-serif;
-    background-color: #e6f7ff;
+    font-family: "Segoe UI", Verdana, sans-serif;
+    background-color: #f7fbfd;
     color: #333;
     line-height: 1.8;
-    font-size: 16px;
+    font-size: 17px;
     margin: 0;
     padding: 0;
   }
 
   h1, h2, h3 {
-    margin: 0;
+    margin: 0 0 15px 0;
+    font-weight: 600;
   }
 
   h1 {
-    font-size: 48px;
+    font-size: 46px;
     color: #004d80;
   }
 
   h2 {
     color: #004d80;
-    font-size: 38px;
-    font-weight: bold;
+    font-size: 34px;
     margin-bottom: 20px;
   }
 
   p {
-    color: #333;
+    color: #444;
     line-height: 1.8;
+    margin-bottom: 15px;
   }
 
   a {
@@ -39,7 +40,7 @@
 
   /* Hero Section */
   #home {
-    background: linear-gradient(rgba(49, 49, 49, 0.45), rgba(49, 48, 48, 0.45)),
+    background: linear-gradient(rgba(30,30,30,0.45), rgba(30,30,30,0.45)),
       url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
     min-height: 70vh;
     display: flex;
@@ -53,67 +54,69 @@
 
   #home h1 {
     color: #fff;
+    margin-bottom: 20px;
   }
 
   #home p {
-    font-size: 22px;
+    font-size: 20px;
     max-width: 700px;
     margin-bottom: 30px;
-    color: #f1f1f1;
+    color: #f5f5f5;
   }
 
   #home a {
     background: #ffffff;
     color: #004d80;
-    padding: 14px 30px;
-    border-radius: 8px;
-    border: 1px solid #004d80;
+    padding: 14px 32px;
+    border-radius: 10px;
+    border: 2px solid #004d80;
     font-size: 18px;
+    font-weight: 500;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,77,128,0.25);
   }
 
   #home a:hover {
     background: #004d80;
     color: #fff;
+    box-shadow: 0 6px 16px rgba(0,77,128,0.35);
   }
 
   /* Features Section */
   #features {
     background: #f0fbff;
-    padding: 80px 50px;
+    padding: 80px 40px;
     text-align: center;
-    border-radius: 14px;
   }
 
   #features p {
-    max-width: 700px;
+    max-width: 720px;
     margin: 0 auto 40px auto;
     font-size: 18px;
   }
 
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 30px;
-    margin-top: 40px;
   }
 
   .feature-card {
     background: #fff;
     border-radius: 16px;
-    padding: 30px 20px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    padding: 30px 25px;
+    box-shadow: 0 8px 20px rgba(0,77,128,0.25);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-align: center;
   }
 
   .feature-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0,77,128,0.4);
   }
 
   .feature-card i {
-    font-size: 36px;
+    font-size: 38px;
     color: #004d80;
     margin-bottom: 15px;
   }
@@ -121,6 +124,7 @@
   .feature-card h3 {
     font-size: 20px;
     margin-bottom: 10px;
+    color: #004d80;
   }
 
   .feature-card p {
@@ -133,11 +137,10 @@
     padding: 80px 20px;
     background: #fff;
     text-align: center;
-    position: relative;
   }
 
   #testimonials h2 {
-    margin-bottom: 50px;
+    margin-bottom: 40px;
   }
 
   .testimonial-carousel-container {
@@ -154,12 +157,12 @@
   .testimonial-card {
     min-width: 33.3333%;
     margin: 0 10px;
-    background: #f9f9f9;
+    background: #f9fbfd;
     border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,77,128,0.25);
+    padding: 25px;
     text-align: center;
-    opacity: 0.5;
+    opacity: 0.6;
     transform: scale(0.9);
     transition: transform 0.5s ease, opacity 0.5s ease;
   }
@@ -168,45 +171,40 @@
     transform: scale(1.05);
     opacity: 1;
     z-index: 2;
-  }
-
-  .testimonial-card.left,
-  .testimonial-card.right {
-    opacity: 0.7;
-    transform: scale(0.95);
-    z-index: 1;
+    box-shadow: 0 12px 30px rgba(0,77,128,0.35);
   }
 
   .testimonial-card img {
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    border: 3px solid #004d80;
   }
 
   .testimonial-card strong {
     color: #004d80;
     display: block;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
   .testimonial-card span {
     font-size: 14px;
-    color: #666;
+    color: #777;
   }
 
   .testimonial-card p {
-    font-size: 18px;
-    margin-bottom: 20px;
+    font-size: 17px;
+    margin-bottom: 18px;
+    color: #333;
   }
 
-  /* Carousel arrows */
+  /* Carousel buttons */
   .carousel-btn {
     background: rgba(0, 77, 128, 0.8);
     border-radius: 50%;
     border: none;
-    font-size: 28px;
+    font-size: 22px;
     color: #fff;
     cursor: pointer;
     padding: 10px 14px;
@@ -214,35 +212,128 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 10;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
   }
 
   .carousel-btn:hover {
-    background: #004d80;
+    background: rgba(0, 77, 128, 1);
   }
 
-  .carousel-btn.prev {
-    left: 10px;
-  }
-
-  .carousel-btn.next {
-    right: 10px;
-  }
+  .carousel-btn.prev { left: 12px; }
+  .carousel-btn.next { right: 12px; }
 
   @media(max-width:768px){
-    .testimonial-card {
-      min-width: 100%;
-      margin: 0;
-    }
-
-    .testimonial-card.left,
-    .testimonial-card.right {
-      display: none;
-    }
-
+    .testimonial-card { min-width: 100%; margin: 0; }
     .carousel-btn.prev { left: 5px; }
     .carousel-btn.next { right: 5px; }
+  }
+
+  /* Pricing Section */
+  #pricing {
+    background: #f0fbff;
+    padding: 80px 40px;
+    text-align: center;
+  }
+
+  #pricing h2 {
+    font-size: 34px;
+    color: #004d80;
+    margin-bottom: 15px;
+  }
+
+  #pricing p {
+    max-width: 720px;
+    margin: 0 auto 50px auto;
+    font-size: 18px;
+    color: #444;
+  }
+
+  .pricing-grid {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .pricing-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 25px;
+    width: 320px;
+    box-shadow: 0 8px 20px rgba(0,77,128,0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+
+  .pricing-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 14px 30px rgba(0,77,128,0.4);
+  }
+
+  .pricing-card h3 {
+    font-size: 22px;
+    color: #004d80;
+    margin-bottom: 10px;
+  }
+
+  .pricing-card .price {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 15px 0;
+    color: #333;
+  }
+
+  .pricing-card .price span {
+    font-size: 15px;
+    color: #777;
+  }
+
+  .pricing-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    text-align: left;
+  }
+
+  .pricing-card ul li {
+    margin: 10px 0;
+    font-size: 16px;
+  }
+
+  .pricing-card .btn {
+    display: inline-block;
+    background: #004d80;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+  }
+
+  .pricing-card .btn:hover {
+    background: #003355;
+  }
+
+  .pricing-card.premium {
+    border: 3px solid #004d80;
+    transform: scale(1.05);
+    box-shadow: 0 16px 36px rgba(0,77,128,0.4);
+  }
+
+  .pricing-card.premium::before {
+    content: "Most Popular";
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #004d80;
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
   }
 </style>
 
@@ -255,40 +346,39 @@
   </section>
 
   <!-- Features Section -->
-<section id="features">
-  <h2 class="fw-bold"></i> Why Choose Nomad?</h2>
-  <p>
-    Nomad Tour Management System simplifies travel planning by combining efficiency,
-    innovation, and user-friendly tools that meet every professional travel need.
-  </p>
+  <section id="features">
+    <h2 class="fw-bold">Why Choose Nomad?</h2>
+    <p>
+      Nomad Tour Management System simplifies travel planning by combining efficiency,
+      innovation, and user-friendly tools that meet every professional travel need.
+    </p>
 
-  <div class="features-grid">
-    <div class="feature-card">
-      <i class="bi bi-clock-history display-5 text-primary mb-3"></i>
-      <h3 class="fw-bold">Save Time</h3>
-      <p>Centralized platform to organize and manage tours efficiently.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <i class="bi bi-clock-history display-5 text-primary mb-3"></i>
+        <h3 class="fw-bold">Save Time</h3>
+        <p>Centralized platform to organize and manage tours efficiently.</p>
+      </div>
+
+      <div class="feature-card">
+        <i class="bi bi-graph-up-arrow display-5 text-success mb-3"></i>
+        <h3 class="fw-bold">Track Progress</h3>
+        <p>Monitor your tours and performance easily.</p>
+      </div>
+
+      <div class="feature-card">
+        <i class="bi bi-people-fill display-5 text-info mb-3"></i>
+        <h3 class="fw-bold">Collaborate Seamlessly</h3>
+        <p>Stay connected with clients and team members effortlessly.</p>
+      </div>
+
+      <div class="feature-card">
+        <i class="bi bi-shield-check display-5 text-warning mb-3"></i>
+        <h3 class="fw-bold">Reliable & Accurate</h3>
+        <p>Manage itineraries and schedules with confidence.</p>
+      </div>
     </div>
-
-    <div class="feature-card">
-      <i class="bi bi-graph-up-arrow display-5 text-success mb-3"></i>
-      <h3 class="fw-bold">Track Progress</h3>
-      <p>Monitor your tours and performance easily.</p>
-    </div>
-
-    <div class="feature-card">
-      <i class="bi bi-people-fill display-5 text-info mb-3"></i>
-      <h3 class="fw-bold">Collaborate Seamlessly</h3>
-      <p>Stay connected with clients and team members effortlessly.</p>
-    </div>
-
-    <div class="feature-card">
-      <i class="bi bi-shield-check display-5 text-warning mb-3"></i>
-      <h3 class="fw-bold">Reliable & Accurate</h3>
-      <p>Manage itineraries and schedules with confidence.</p>
-    </div>
-  </div>
-</section>
-
+  </section>
 
   <!-- Testimonials Section -->
   <section id="testimonials">
@@ -325,6 +415,40 @@
       <button class="carousel-btn next">&#10095;</button>
     </div>
   </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing">
+    <h2>Choose Your Plan</h2>
+    <p>Get started with a free trial or unlock premium features for your business.</p>
+
+    <div class="pricing-grid">
+      <!-- Free Trial -->
+      <div class="pricing-card">
+        <h3>Free Trial</h3>
+        <p class="price">$0 <span>/ month</span></p>
+        <ul>
+          <li>✔ Access to core features</li>
+          <li>✔ Manage up to 3 tours</li>
+          <li>✔ Basic customer support</li>
+          <li>✔ 14-day trial period</li>
+        </ul>
+        <a href="{% url 'login' %}" class="btn">Start Free</a>
+      </div>
+
+      <!-- Premium Plan -->
+      <div class="pricing-card premium">
+        <h3>Premium Monthly</h3>
+        <p class="price">$20 <span>/ month</span></p>
+        <ul>
+          <li>✔ Unlimited tours & itineraries</li>
+          <li>✔ Advanced analytics & reports</li>
+          <li>✔ Priority customer support</li>
+          <li>✔ Team collaboration tools</li>
+        </ul>
+        <a href="{% url 'login' %}" class="btn">Go Premium</a>
+      </div>
+    </div>
+  </section>
 </main>
 
 <script>
@@ -335,16 +459,13 @@
   const autoSlideInterval = 5000;
   let isAnimating = false;
 
-  // Detect screen size
   function isSmallScreen() {
     return window.innerWidth <= 768;
   }
 
-  // Highlight center card
   function updateHighlight() {
     const cards = Array.from(wrapper.children);
     cards.forEach(c => c.classList.remove('left','center','right'));
-    
     if (isSmallScreen()) {
       cards[0].classList.add('center');
     } else {
@@ -354,15 +475,12 @@
     }
   }
 
-  // Move forward with smooth slide
   function next() {
     if (isAnimating) return;
     isAnimating = true;
-
     const shift = isSmallScreen() ? '-100%' : '-33.3333%';
     wrapper.style.transition = 'transform 0.6s ease';
     wrapper.style.transform = `translateX(${shift})`;
-
     wrapper.addEventListener('transitionend', () => {
       wrapper.appendChild(wrapper.firstElementChild);
       wrapper.style.transition = 'none';
@@ -372,20 +490,16 @@
     }, { once: true });
   }
 
-  // Move backward with smooth slide
   function prev() {
     if (isAnimating) return;
     isAnimating = true;
-
     wrapper.insertBefore(wrapper.lastElementChild, wrapper.firstElementChild);
     wrapper.style.transition = 'none';
     wrapper.style.transform = isSmallScreen() ? 'translateX(-100%)' : 'translateX(-33.3333%)';
-
     requestAnimationFrame(() => {
       wrapper.style.transition = 'transform 0.6s ease';
       wrapper.style.transform = 'translateX(0)';
     });
-
     wrapper.addEventListener('transitionend', () => {
       updateHighlight();
       isAnimating = false;
@@ -401,7 +515,6 @@
     autoSlide = setInterval(next, autoSlideInterval);
   }
 
-  // Touch swipe
   let startX = 0, isDragging = false;
   wrapper.addEventListener('touchstart', e => {
     startX = e.touches[0].clientX; 
@@ -415,7 +528,6 @@
     else if (startX - endX > 50) next();
   });
 
-  // Initial highlight + update on resize
   updateHighlight();
   window.addEventListener('resize', updateHighlight);
 </script>

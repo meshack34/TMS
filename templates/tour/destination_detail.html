@@ -1,41 +1,57 @@
 {% extends "base_dashboard.html" %}
 {% load static %}
+{% block title %}Destination: {{ destination.name }}{% endblock %}
 {% block content %}
 
-<div class="container my-4">
-  <div class="row">
-    <!-- LEFT: overview -->
-    <div class="col-lg-4 mb-4">
-      <p class="text-muted">Destination</p>
-      <h1 class="h3 fw-bold">{{ destination.name }}</h1>
-      <p class="text-uppercase text-muted">
-        {{ destination.country }} •
-        {{ destination.start_date|date:"j M Y" }} - {{ destination.end_date|date:"j M Y" }}
-      </p>
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="row g-4">
+    
+    <!-- LEFT COLUMN -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <p class="text-muted small mb-1">Destination</p>
+          <h3 class="fw-bold">{{ destination.name }}</h3>
+          <p class="text-uppercase text-muted small mb-3">
+            {{ destination.country }} •
+            {{ destination.start_date|date:"j M Y" }} – {{ destination.end_date|date:"j M Y" }}
+          </p>
 
-      <div class="bg-light p-3 rounded-4 shadow-sm mt-4">
-        <h5>About This Destination</h5>
-        <p class="mb-0">{{ destination.description }}</p>
-      </div>
+          <!-- About -->
+          <div class="bg-light rounded-3 p-3 mb-3 shadow-sm">
+            <h6 class="fw-semibold mb-2"><i class="bi bi-info-circle me-1 text-primary"></i> About</h6>
+            <p class="mb-0 small">{{ destination.description|default:"No description provided." }}</p>
+          </div>
 
-      <div class="bg-white border rounded-4 shadow-sm mt-3 p-3">
-        <h6 class="mb-2">Costs (this destination)</h6>
-        <ul class="list-unstyled small mb-0">
-          <li>Accommodation: <strong>{{ totals.Accommodation }}</strong></li>
-          <li>Activities: <strong>{{ totals.Activities }}</strong></li>
-          <li>Dining: <strong>{{ totals.Dining }}</strong></li>
-          <li class="mt-1">Subtotal: <strong>{{ totals.Subtotal }}</strong></li>
-        </ul>
-      </div>
+          <!-- Costs -->
+          <div class="card shadow-sm border-0 mb-3">
+            <div class="card-header bg-white fw-semibold">Costs (This Destination)</div>
+            <div class="card-body small">
+              <ul class="list-unstyled mb-0">
+                <li>Accommodation: <strong>{{ totals.Accommodation }}</strong></li>
+                <li>Activities: <strong>{{ totals.Activities }}</strong></li>
+                <li>Dining: <strong>{{ totals.Dining }}</strong></li>
+                <li class="mt-2 fw-semibold">Subtotal: {{ totals.Subtotal }}</li>
+              </ul>
+            </div>
+          </div>
 
-      <div class="mt-3">
-        <a class="btn btn-outline-secondary btn-sm" href="{% url 'edit_destination' destination.id %}">Edit</a>
-        <a class="btn btn-outline-danger btn-sm" href="{% url 'delete_destination' destination.id %}">Delete</a>
+          <!-- Actions -->
+          <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'edit_destination' destination.id %}">
+              <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+            <a class="btn btn-outline-danger btn-sm" href="{% url 'delete_destination' destination.id %}">
+              <i class="bi bi-trash me-1"></i> Delete
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- RIGHT: tabs -->
+    <!-- RIGHT COLUMN -->
     <div class="col-lg-8">
+      <!-- Tabs -->
       <ul class="nav nav-tabs mb-3" id="destinationTabs" role="tablist">
         {% for tab in tab_labels %}
           <li class="nav-item" role="presentation">
@@ -51,69 +67,55 @@
         {% endfor %}
       </ul>
 
-      <div class="tab-content border rounded-bottom p-3 bg-white shadow-sm" id="destinationTabsContent" style="min-height: 220px;">
-
+      <!-- Tab content -->
+      <div class="tab-content border rounded-bottom bg-white shadow-sm p-3" id="destinationTabsContent" style="min-height: 250px;">
+        
         <!-- Overview -->
         <div class="tab-pane fade show active" id="overview" role="tabpanel">
           <div class="small">
-            <!-- <p class="mb-2"><strong>Restaurants (names only):</strong></p>
-            {% if destination.restaurants.all %}
-              <ul>
-                {% for r in destination.restaurants.all %}
-                  <li>{{ r.name }}</li>
-                {% empty %}
-                  <li class="text-muted">No restaurants yet.</li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <p class="text-muted">No restaurants yet.</p>
-            {% endif %} -->
-
-            <div class="d-flex flex-wrap gap-2 mt-3">
+            <h6 class="fw-semibold mb-2"><i class="bi bi-plus-circle text-success me-1"></i> Add to Destination</h6>
+            <div class="d-flex flex-wrap gap-2">
               <a href="{% url 'upload_destination_image' destination.id %}" class="btn btn-outline-success btn-sm">Add Image</a>
               <a href="{% url 'upload_restaurant' destination.id %}" class="btn btn-outline-success btn-sm">Add Restaurant</a>
               <a href="{% url 'upload_stay' destination.id %}" class="btn btn-outline-success btn-sm">Add Stay</a>
               <a href="{% url 'upload_activity' destination.id %}" class="btn btn-outline-success btn-sm">Add Activity</a>
               <a href="{% url 'upload_dining' destination.id %}" class="btn btn-outline-success btn-sm">Add Dining</a>
-              
             </div>
           </div>
         </div>
 
-        
-        <!-- galleries -->
-            <div class="tab-pane fade" id="gallery" role="tabpanel">
-              {% if destination.galleries.all %}
-                <div class="row g-3">
-                  {% for img in destination.galleries.all %}
-                    <div class="col-6 col-md-4 col-lg-3">
-                      <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#lightboxModal{{ forloop.counter }}">
-                        <img src="{{ img.image.url }}" class="img-fluid rounded shadow-sm gallery-thumb" alt="Gallery Image">
-                      </a>
-                    </div>
-
-                    <!-- Modal for lightbox -->
-                    <div class="modal fade" id="lightboxModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content bg-transparent border-0">
-                          <img src="{{ img.image.url }}" class="img-fluid rounded shadow" alt="Gallery Image">
-                        </div>
-                      </div>
-                    </div>
-                  {% endfor %}
+        <!-- Gallery -->
+        <div class="tab-pane fade" id="gallery" role="tabpanel">
+          {% if destination.galleries.all %}
+            <div class="row g-3">
+              {% for img in destination.galleries.all %}
+                <div class="col-6 col-md-4 col-lg-3">
+                  <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#lightboxModal{{ forloop.counter }}">
+                    <img src="{{ img.image.url }}" class="img-fluid rounded shadow-sm gallery-thumb" alt="Gallery Image">
+                  </a>
                 </div>
-              {% else %}
-                <p class="text-muted">No gallery images yet.</p>
-              {% endif %}
-            </div>
 
+                <!-- Lightbox modal -->
+                <div class="modal fade" id="lightboxModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content bg-transparent border-0">
+                      <img src="{{ img.image.url }}" class="img-fluid rounded shadow" alt="Gallery Image">
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted">No gallery images yet.</p>
+          {% endif %}
+        </div>
 
         <!-- Stays -->
         <div class="tab-pane fade" id="stays" role="tabpanel">
           {% if destination.stays.all %}
             <div class="table-responsive">
-              <table class="table table-sm">
-                <thead>
+              <table class="table table-hover table-sm align-middle">
+                <thead class="table-light">
                   <tr>
                     <th>Hotel</th><th>Nights</th><th>Rooms</th><th>Basis</th><th>Nightly</th><th>Total</th>
                   </tr>
@@ -137,42 +139,38 @@
           {% endif %}
         </div>
 
-
-
         <!-- Activities -->
         <div class="tab-pane fade" id="activities" role="tabpanel">
-          <div class="timeline">
-            {% for day in itinerary_days %}
-              {% if day.activities %}
-                {% for a in day.activities %}
-                  <div class="d-flex mb-3 border-bottom pb-2">
-                    <div class="me-3 text-muted small" style="min-width: 130px;">
-                      {{ a.date }} &nbsp; {{ a.start_time|time:"g:i A" }} - {{ a.end_time|time:"g:i A" }}
-                    </div>
-                    <div class="flex-grow-1">
-                      <strong>{{ a.name }}</strong>
-                      {% if a.cost %}<div class="small text-muted">Cost: {{ a.cost }}</div>{% endif %}
-                    </div>
-                  </div>
-                {% endfor %}
-              {% else %}
+          {% for day in itinerary_days %}
+            {% if day.activities %}
+              {% for a in day.activities %}
                 <div class="d-flex mb-3 border-bottom pb-2">
                   <div class="me-3 text-muted small" style="min-width: 130px;">
-                    {{ day.date }}
+                    {{ a.date }} &nbsp; {{ a.start_time|time:"g:i A" }} – {{ a.end_time|time:"g:i A" }}
                   </div>
-                  <div class="flex-grow-1 text-muted">No activities scheduled.</div>
+                  <div class="flex-grow-1">
+                    <strong>{{ a.name }}</strong>
+                    {% if a.cost %}<div class="small text-muted">Cost: {{ a.cost }}</div>{% endif %}
+                  </div>
                 </div>
-              {% endif %}
-            {% endfor %}
-          </div>
+              {% endfor %}
+            {% else %}
+              <div class="d-flex mb-3 border-bottom pb-2">
+                <div class="me-3 text-muted small" style="min-width: 130px;">
+                  {{ day.date }}
+                </div>
+                <div class="flex-grow-1 text-muted">No activities scheduled.</div>
+              </div>
+            {% endif %}
+          {% endfor %}
         </div>
 
         <!-- Dining -->
         <div class="tab-pane fade" id="dining" role="tabpanel">
           {% if destination.dining_expenses.all %}
             <div class="table-responsive">
-              <table class="table table-sm">
-                <thead>
+              <table class="table table-hover table-sm align-middle">
+                <thead class="table-light">
                   <tr>
                     <th>Date</th><th>Restaurant</th><th>Description</th><th>Cost</th>
                   </tr>
@@ -181,15 +179,7 @@
                   {% for d in destination.dining_expenses.all %}
                     <tr>
                       <td>{{ d.date }}</td>
-                      <td>
-                          {% if d.restaurant %}
-                            {{ d.restaurant.name }}
-                          {% else %}
-                            Other
-                          {% endif %}
-                        </td>
-
-                      {% comment %} <td>{{ d.restaurant.name if d.restaurant }}</td> {% endcomment %}
+                      <td>{% if d.restaurant %}{{ d.restaurant.name }}{% else %}Other{% endif %}</td>
                       <td class="small">{{ d.description }}</td>
                       <td>{{ d.cost }}</td>
                     </tr>
@@ -202,13 +192,13 @@
           {% endif %}
         </div>
 
-        <!-- Transport (legs that arrive to / depart from this destination) -->
+        <!-- Transport -->
         <div class="tab-pane fade" id="transport" role="tabpanel">
           {% with arriving=destination.arriving_legs.all departing=destination.departing_legs.all %}
             {% if arriving or departing %}
               <div class="row">
                 <div class="col-md-6">
-                  <h6>Arriving</h6>
+                  <h6 class="fw-semibold">Arriving</h6>
                   <ul class="small">
                     {% for leg in arriving %}
                       <li>{{ leg.date }} — {{ leg.mode }} from {{ leg.from_location }} ({{ leg.from_destination.name|default:"-" }}) — Cost: {{ leg.cost }}</li>
@@ -218,7 +208,7 @@
                   </ul>
                 </div>
                 <div class="col-md-6">
-                  <h6>Departing</h6>
+                  <h6 class="fw-semibold">Departing</h6>
                   <ul class="small">
                     {% for leg in departing %}
                       <li>{{ leg.date }} — {{ leg.mode }} to {{ leg.to_location }} ({{ leg.to_destination.name|default:"-" }}) — Cost: {{ leg.cost }}</li>
@@ -241,48 +231,33 @@
           </div>
         </div>
 
-                  <!-- Cost Summary -->
-              
-                      <!-- Cost Summary -->
-                  <div class="tab-pane fade" id="costs" role="tabpanel">
-                    <h5 class="mb-3">Cost Summary for {{ destination.name }}</h5>
-                    <div class="table-responsive">
-                      <table class="table table-sm table-bordered table-hover">
-                        <thead class="table-light">
-                          <tr>
-                            <th scope="col">Category</th>
-                            <th scope="col">Cost (USD)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>Accommodation</td>
-                            <td>{{ totals.Accommodation|floatformat:2 }}</td>
-                          </tr>
-                          <tr>
-                            <td>Activities</td>
-                            <td>{{ totals.Activities|floatformat:2 }}</td>
-                          </tr>
-                          <tr>
-                            <td>Dining</td>
-                            <td>{{ totals.Dining|floatformat:2 }}</td>
-                          </tr>
-                          <tr>
-                            <td>Transport (This Destination)</td>
-                            <td>{{ totals.Transport|floatformat:2 }}</td>
-                          </tr>
-                          <tr class="table-secondary fw-bold">
-                            <td>Total</td>
-                            <td>{{ totals.Total|floatformat:2 }}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
+        <!-- Costs Summary -->
+        <div class="tab-pane fade" id="costs" role="tabpanel">
+          <h6 class="fw-semibold mb-3">Cost Summary for {{ destination.name }}</h6>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover table-sm align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Category</th>
+                  <th>Cost (USD)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Accommodation</td><td>{{ totals.Accommodation|floatformat:2 }}</td></tr>
+                <tr><td>Activities</td><td>{{ totals.Activities|floatformat:2 }}</td></tr>
+                <tr><td>Dining</td><td>{{ totals.Dining|floatformat:2 }}</td></tr>
+                <tr><td>Transport (This Destination)</td><td>{{ totals.Transport|floatformat:2 }}</td></tr>
+                <tr class="table-secondary fw-bold">
+                  <td>Total</td><td>{{ totals.Total|floatformat:2 }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
       </div>
     </div>
   </div>
 </div>
+
 {% endblock %}
