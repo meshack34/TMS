@@ -1,10 +1,88 @@
 {% extends "base_dashboard.html" %}
 {% block content %}
-<h2>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Subscription for {{ profile.user.username }}</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a href="{% url 'subscription_list' profile.id %}" class="btn btn-secondary">Cancel</a>
-</form>
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="container">
+
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">
+        {% if form.instance.pk %}Edit{% else %}Add{% endif %} Subscription 
+        for {{ profile.user.username }}
+      </h2>
+      <a href="{% url 'subscription_list' profile.id %}" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Back to Subscriptions
+      </a>
+    </div>
+
+    <!-- Form Section -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% for field in form %}
+            <div class="mb-3">
+              
+              {# Special handling for is_active field #}
+              {% if field.name == "is_active" %}
+                <label class="form-label fw-semibold">Status</label>
+                <div class="form-check">
+                  {{ field }}
+                  <label class="form-check-label" for="{{ field.id_for_label }}">
+                    Active
+                  </label>
+                </div>
+
+              {# Force end_date as date input with min=today #}
+              {% elif field.name == "end_date" %}
+                <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                  {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+                </label>
+                <input type="date" 
+                       name="{{ field.name }}" 
+                       id="{{ field.id_for_label }}" 
+                       value="{{ field.value|default_if_none:'' }}" 
+                       min="{% now 'Y-m-d' %}" 
+                       class="form-control">
+
+              {# Default for other fields #}
+              {% else %}
+                <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                  {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+                </label>
+                {{ field }}
+              {% endif %}
+
+              {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <!-- Buttons -->
+          <div class="d-flex gap-2 pt-2">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-check-circle me-1"></i> Save Subscription
+            </button>
+            <a href="{% url 'subscription_list' profile.id %}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll("input, select, textarea").forEach(function(el) {
+    // Don’t apply form-control to checkboxes
+    if (el.type !== "checkbox") {
+      el.classList.add("form-control");
+    }
+  });
+});
+</script>
 {% endblock %}
