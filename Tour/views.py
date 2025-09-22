@@ -1,29 +1,28 @@
-from datetime import timedelta
+
 from django import forms
+import datetime
+from datetime import timedelta
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
+from django.utils import timezone
+from django.core.paginator import Paginator
+from django.db.models import Q, Prefetch
+import paypalrestsdk
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
 from django.utils.decorators import method_decorator
-from django.db.models import Q, Prefetch
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import Client
-from .forms import ClientForm
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from django.shortcuts import render
-
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
     Image as RLImage, PageBreak
@@ -31,19 +30,17 @@ from reportlab.platypus import (
 from reportlab.lib.pagesizes import A4
 import os
 from .models import (
-    Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, TravelLeg, Restaurant
+    Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, Traveler, 
+    TravelLeg, Restaurant,Profile, Subscription
 )
+
 from .forms import (
-    PlannerCreationForm,ProfileForm,
+    PlannerCreationForm,ProfileForm,TravelerForm,
     ClientForm, BookingForm, DestinationForm, DestinationImageForm,
-    ActivityForm, StayForm, DiningExpenseForm, RestaurantForm, TravelLegForm
+    ActivityForm, StayForm, DiningExpenseForm, RestaurantForm, TravelLegForm, SubscriptionForm, AdminSubscriptionForm
 )
-from django.contrib.admin.views.decorators import staff_member_required
-from django.core.paginator import Paginator
-from django.db.models import Prefetch, Q
-from datetime import timedelta
-from .models import Profile, Subscription
-from .forms import AdminSubscriptionForm
+from django.db.models import Prefetch, Q 
+
 
 # ---------- Public ----------
 def home(request):
@@ -200,8 +197,6 @@ class BookingCreateView(CreateView):
         return reverse("booking_detail", kwargs={"pk": self.object.pk})
 
 
-
-
 @method_decorator(login_required, name="dispatch")
 class BookingDetailView(DetailView):
     model = Booking
@@ -214,15 +209,20 @@ class BookingDetailView(DetailView):
             .select_related("client")
             .prefetch_related(
                 Prefetch("destinations", queryset=Destination.objects.all()),
-                Prefetch("travel_legs", queryset=TravelLeg.objects.select_related("from_destination", "to_destination"))
+                Prefetch("travel_legs", queryset=TravelLeg.objects.select_related("from_destination", "to_destination")),
+                Prefetch("travelers", queryset=Traveler.objects.all())
             )
         )
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         booking: Booking = ctx["booking"]
+
+        # existing totals
         ctx["costs"] = booking.cost_breakdown()
         ctx["destinations"] = booking.destinations.all().order_by("start_date")
+
+        # transport summary
         legs = booking.travel_legs.all().select_related(
             "from_destination", "to_destination"
         ).order_by("date", "id")
@@ -236,9 +236,31 @@ class BookingDetailView(DetailView):
         ctx["travel_summary"] = {
             "count": legs.count(),
             "total": total_transport,
-            "by_mode": by_mode,  # dict like {"Flight": 123.45, ...}
+            "by_mode": by_mode,
         }
+
+        # 🔹 NEW: per-traveler breakdown
+        travelers = booking.travelers.all().prefetch_related("stays", "activities", "dining_expenses", "travel_legs")
+        traveler_costs = []
+        for t in travelers:
+            stay_total = sum((s.total_cost or Decimal("0.00")) for s in t.stays.all())
+            act_total = sum((a.cost or Decimal("0.00")) for a in t.activities.all())
+            dining_total = sum((d.cost or Decimal("0.00")) for d in t.dining_expenses.all())
+            travel_total = sum((leg.cost or Decimal("0.00")) for leg in t.travel_legs.all())
+            traveler_costs.append({
+                "traveler": t,
+                "Accommodation": stay_total,
+                "Activities": act_total,
+                "Dining": dining_total,
+                "Transport": travel_total,
+                "Total": stay_total + act_total + dining_total + travel_total,
+            })
+
+        ctx["traveler_costs"] = traveler_costs
         return ctx
+
+
+
 
 # ---------- Destination pages ----------
 @method_decorator(login_required, name="dispatch")
@@ -272,6 +294,20 @@ class DestinationCreateView(CreateView):
         ctx["booking"] = self.booking
         return ctx
 
+@login_required
+def add_traveler(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    if request.method == "POST":
+        form = TravelerForm(request.POST)
+        if form.is_valid():
+            traveler = form.save(commit=False)
+            traveler.booking = booking
+            traveler.save()
+            return redirect("booking_detail", pk=booking.id)
+    else:
+        form = TravelerForm()
+    return render(request, "travelers/add_traveler.html", {"form": form, "booking": booking})
+
 
 @method_decorator(login_required, name="dispatch")
 class DestinationDetailView(DetailView):
@@ -284,9 +320,9 @@ class DestinationDetailView(DetailView):
             Destination.objects.select_related("booking", "booking__client")
             .prefetch_related(
                 Prefetch("galleries", queryset=DestinationImage.objects.all()),
-                Prefetch("stays", queryset=Stay.objects.all()),
-                Prefetch("activities", queryset=Activity.objects.all().order_by("date", "start_time")),
-                Prefetch("dining_expenses", queryset=DiningExpense.objects.select_related("restaurant")),
+                Prefetch("stays", queryset=Stay.objects.prefetch_related("travelers")),
+                Prefetch("activities", queryset=Activity.objects.prefetch_related("travelers").order_by("date", "start_time")),
+                Prefetch("dining_expenses", queryset=DiningExpense.objects.select_related("restaurant").prefetch_related("travelers")),
                 Prefetch("restaurants", queryset=Restaurant.objects.all()),
             )
         )
@@ -295,7 +331,7 @@ class DestinationDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         dest: Destination = ctx["destination"]
 
-        # compute day-by-day list from destination dates (no date_ranges model)
+        # day-by-day activities
         days = []
         current = dest.start_date
         while current <= dest.end_date:
@@ -303,7 +339,7 @@ class DestinationDetailView(DetailView):
             days.append({"date": current, "activities": day_activities})
             current += timedelta(days=1)
 
-        # simple totals just for this destination
+        # totals for this destination
         accom_total = sum((s.total_cost or 0) for s in dest.stays.all())
         activities_total = sum((a.cost or 0) for a in dest.activities.all())
         dining_total = sum((d.cost or 0) for d in dest.dining_expenses.all())
@@ -315,9 +351,27 @@ class DestinationDetailView(DetailView):
             "Subtotal": accom_total + activities_total + dining_total,
         }
 
+        # 🔹 NEW: per-traveler totals for this destination only
+        traveler_costs = []
+        travelers = dest.booking.travelers.all()
+        for t in travelers:
+            stay_total = sum((s.total_cost or 0) for s in dest.stays.filter(travelers=t))
+            act_total = sum((a.cost or 0) for a in dest.activities.filter(travelers=t))
+            dining_total = sum((d.cost or 0) for d in dest.dining_expenses.filter(travelers=t))
+            traveler_costs.append({
+                "traveler": t,
+                "Accommodation": stay_total,
+                "Activities": act_total,
+                "Dining": dining_total,
+                "Total": stay_total + act_total + dining_total,
+            })
+
+        ctx["traveler_costs"] = traveler_costs
+
         ctx["tab_labels"] = ["Overview","Gallery", "Stays", "Activities", "Dining", "Transport", "Map","Costs"]
         ctx["itinerary_days"] = days
         return ctx
+
 
 
 @login_required
@@ -369,57 +423,72 @@ def upload_destination_image(request, pk):
         "tour/upload_destination_image.html",
         {"form": form, "destination": destination},
     )
-
-
 @login_required
 def upload_activity(request, destination_id):
     destination = get_object_or_404(Destination, id=destination_id)
+    booking = destination.booking  # get the related booking
+
     if request.method == "POST":
-        form = ActivityForm(request.POST)
+        form = ActivityForm(request.POST, booking=booking)
         if form.is_valid():
             activity = form.save(commit=False)
             activity.destination = destination
             activity.save()
-            messages.success(request, "Activity added.")
-            return redirect("destination_detail", pk=destination.id)
+            form.save_m2m()  # save travelers
+            messages.success(request, "Activity added successfully.")
+            return redirect("booking_detail", pk=booking.id)
+
     else:
-        form = ActivityForm(initial={"destination": destination})
-        form.fields["destination"].widget = forms.HiddenInput()
-    return render(request, "tour/upload_activity.html", {"form": form, "title": "Add Activity", "destination": destination})
+        form = ActivityForm(booking=booking)
+
+    return render(request, "tour/upload_activity.html", {"form": form, "destination": destination})
+
+
 
 
 @login_required
 def upload_stay(request, destination_id):
     destination = get_object_or_404(Destination, id=destination_id)
+    booking = destination.booking  # ✅
+
     if request.method == "POST":
-        form = StayForm(request.POST)
+        form = StayForm(request.POST, booking=booking)  # ✅
         if form.is_valid():
             stay = form.save(commit=False)
             stay.destination = destination
-            stay.save()  # total_cost computed in model.save()
+            stay.save()
+            form.save_m2m()  # ✅ travelers saved
             messages.success(request, "Stay added.")
             return redirect("destination_detail", pk=destination.id)
     else:
-        form = StayForm(initial={"destination": destination})
+        form = StayForm(initial={"destination": destination}, booking=booking)
         form.fields["destination"].widget = forms.HiddenInput()
-    return render(request, "tour/upload_stay.html", {"form": form, "title": "Add Stay", "destination": destination})
 
+    return render(request, "tour/upload_stay.html", {
+        "form": form, "title": "Add Stay", "destination": destination
+    })
 
 @login_required
 def upload_dining_expense(request, destination_id):
     destination = get_object_or_404(Destination, id=destination_id)
+    booking = destination.booking  # ✅
+
     if request.method == "POST":
-        form = DiningExpenseForm(request.POST)
+        form = DiningExpenseForm(request.POST, booking=booking)  # ✅
         if form.is_valid():
             de = form.save(commit=False)
             de.destination = destination
             de.save()
+            form.save_m2m()  # ✅ travelers saved
             messages.success(request, "Dining expense added.")
             return redirect("destination_detail", pk=destination.id)
     else:
-        form = DiningExpenseForm(initial={"destination": destination})
+        form = DiningExpenseForm(initial={"destination": destination}, booking=booking)
         form.fields["destination"].widget = forms.HiddenInput()
-    return render(request, "tour/upload_dining.html", {"form": form, "title": "Add Dining Expense", "destination": destination})
+
+    return render(request, "tour/upload_dining.html", {
+        "form": form, "title": "Add Dining Expense", "destination": destination
+    })
 
 
 @login_required
@@ -439,27 +508,45 @@ def upload_restaurant(request, destination_id):
     return render(request, "tour/upload_restaurant.html", {"form": form, "title": "Add Restaurant", "destination": destination})
 
 
+
 @login_required
 def upload_travel_leg(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
+
     if request.method == "POST":
-        form = TravelLegForm(request.POST)
+        form = TravelLegForm(request.POST, booking=booking)  
         if form.is_valid():
             leg = form.save(commit=False)
             leg.booking = booking
             leg.save()
+            form.save_m2m()  # ✅ travelers saved
             messages.success(request, "Travel leg added.")
             return redirect("booking_detail", pk=booking.id)
     else:
-        form = TravelLegForm(initial={"booking": booking})
+        form = TravelLegForm(initial={"booking": booking}, booking=booking)  
         form.fields["booking"].widget = forms.HiddenInput()
 
-        # optional: restrict from/to destination choices to this booking
+        # still keep your destination filters
         form.fields["from_destination"].queryset = booking.destinations.all()
         form.fields["to_destination"].queryset = booking.destinations.all()
 
-    return render(request, "tour/upload_travel_leg.html", {"form": form, "title": "Add Travel Leg", "booking": booking})
+    return render(request, "tour/upload_travel_leg.html", {
+        "form": form, "title": "Add Travel Leg", "booking": booking
+    })
 
+
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+    Image as RLImage, PageBreak
+)
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+import os
+
+from .models import Booking
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
@@ -611,6 +698,7 @@ def booking_pdf(request, pk):
     return response
 
 
+
 # views.py
 @login_required
 def profile_view(request):
@@ -626,11 +714,6 @@ def profile_view(request):
     return render(request, "tour/profile.html", {"form": form, "profile": profile})
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import Profile, Subscription
-from .forms import SubscriptionForm
 
 @login_required
 def planner_list(request):
@@ -647,111 +730,138 @@ def subscription_list(request, profile_id):
     return render(request, "tour/subscription_list.html", {"profile": profile, "subscriptions": subscriptions})
 
 
-@login_required
-def subscription_create(request, profile_id):
-    """Add a new subscription to a planner"""
-    profile = get_object_or_404(Profile, id=profile_id)
 
+# ========================
+# PayPal SDK Configuration
+# ========================
+paypalrestsdk.configure({
+    "mode": settings.PAYPAL_MODE,  # "sandbox" or "live"
+    "client_id": settings.PAYPAL_CLIENT_ID,
+    "client_secret": settings.PAYPAL_CLIENT_SECRET,
+})
+
+
+# ========================
+# USER (Planner) VIEWS
+# ========================
+
+@login_required
+def my_subscriptions(request):
+    """Show logged-in planner’s subscriptions"""
+    profile = request.user.profile
+    subs = profile.subscriptions.all()
+    return render(request, "subscriptions/my_subscriptions.html", {"subscriptions": subs})
+
+
+@login_required
+def my_subscription_create(request):
+    """Planner creates a new subscription (pending until paid & admin-approved)"""
+    profile = request.user.profile
     if request.method == "POST":
         form = SubscriptionForm(request.POST)
         if form.is_valid():
             subscription = form.save(commit=False)
             subscription.profile = profile
+            subscription.status = "Pending"
+            subscription.payment_status = "pending"
             subscription.save()
-            messages.success(request, "Subscription created successfully.")
-            return redirect("subscription_list", profile_id=profile.id)
+            messages.success(request, "Subscription created. Please proceed with payment.")
+            return redirect("create_payment", subscription_id=subscription.id)
     else:
         form = SubscriptionForm()
-
-    return render(request, "tour/subscription_form.html", {"form": form, "profile": profile})
+    return render(request, "subscriptions/my_subscription_form.html", {"form": form})
 
 
 @login_required
-def subscription_edit(request, pk):
-    """Edit an existing subscription"""
-    subscription = get_object_or_404(Subscription, pk=pk)
-
+def my_subscription_edit(request, pk):
+    """Edit subscription before payment"""
+    profile = request.user.profile
+    subscription = get_object_or_404(Subscription, pk=pk, profile=profile, payment_status="pending")
     if request.method == "POST":
         form = SubscriptionForm(request.POST, instance=subscription)
         if form.is_valid():
             form.save()
-            messages.success(request, "Subscription updated successfully.")
-            return redirect("subscription_list", profile_id=subscription.profile.id)
+            return redirect("my_subscriptions")
     else:
         form = SubscriptionForm(instance=subscription)
+    return render(request, "subscriptions/my_subscription_form.html", {"form": form})
 
-    return render(request, "tour/subscription_form.html", {"form": form, "profile": subscription.profile})
 
-import datetime
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils import timezone
-from .models import Profile, Subscription
+# ========================
+# PAYPAL VIEWS
+# ========================
 
-# Existing views like planner_list(), subscription_list() remain the same
+@login_required
+def create_payment(request, subscription_id):
+    """Start PayPal payment for subscription"""
+    subscription = get_object_or_404(Subscription, id=subscription_id, profile=request.user.profile)
+    request.session["subscription_id"] = subscription.id
+
+    payment = paypalrestsdk.Payment({
+        "intent": "sale",
+        "payer": {"payment_method": "paypal"},
+        "redirect_urls": {
+            "return_url": request.build_absolute_uri(reverse("execute_payment")),
+            "cancel_url": request.build_absolute_uri(reverse("my_subscriptions")),
+        },
+        "transactions": [{
+            "item_list": {
+                "items": [{
+                    "name": subscription.plan,
+                    "sku": f"sub_{subscription.id}",
+                    "price": str(subscription.fee),
+                    "currency": "USD",   # ⚠️ update if supporting KES with conversion
+                    "quantity": 1
+                }]
+            },
+            "amount": {
+                "total": str(subscription.fee),
+                "currency": "USD"
+            },
+            "description": f"Subscription payment for {subscription.plan}"
+        }]
+    })
+
+    if payment.create():
+        subscription.transaction_id = payment.id
+        subscription.save()
+        for link in payment.links:
+            if link.rel == "approval_url":
+                return redirect(link.href)
+    else:
+        return render(request, "subscriptions/payment_error.html", {"error": payment.error})
 
 
 @login_required
-def subscription_checkout(request, profile_id, plan):
-    """Show PayPal checkout for a selected plan"""
-    profile = get_object_or_404(Profile, id=profile_id)
+def execute_payment(request):
+    """Finalize PayPal payment and mark subscription as paid (but still Pending until admin approves)"""
+    payment_id = request.GET.get("paymentId")
+    payer_id = request.GET.get("PayerID")
 
-    fees = {"basic": 500, "pro": 1500, "enterprise": 5000}  # KSH example
-    if plan not in fees:
-        messages.error(request, "Invalid plan selected.")
-        return redirect("planner_list")
+    payment = paypalrestsdk.Payment.find(payment_id)
 
-    fee = fees[plan]
+    if payment.execute({"payer_id": payer_id}):
+        subscription_id = request.session.get("subscription_id")
+        subscription = Subscription.objects.get(id=subscription_id)
 
-    # Create subscription (pending)
-    subscription = Subscription.objects.create(
-        profile=profile,
-        plan=plan,
-        fee=fee,
-        start_date=timezone.now().date(),
-        end_date=timezone.now().date() + datetime.timedelta(days=30),
-        is_active=False,
-        payment_status="pending",
-    )
+        subscription.payment_status = "completed"
+        subscription.save()
 
-    context = {
-        "profile": profile,
-        "subscription": subscription,
-        "paypal_client_id": "YOUR_PAYPAL_CLIENT_ID",  # replace with real one
-    }
-    return render(request, "tour/subscription_checkout.html", context)
+        messages.success(request, "Payment successful! Awaiting admin approval.")
+        return render(request, "subscriptions/payment_success.html", {"subscription": subscription})
+    else:
+        return render(request, "subscriptions/payment_error.html", {"error": payment.error})
 
 
-@login_required
-def subscription_success(request, sub_id):
-    """Mark subscription as active after successful PayPal payment"""
-    subscription = get_object_or_404(Subscription, id=sub_id)
-    subscription.is_active = True
-    subscription.payment_status = "completed"
-    subscription.save()
-
-    messages.success(request, f"Payment successful! {subscription.plan} subscription activated.")
-    return redirect("subscription_list", profile_id=subscription.profile.id)
-
-
-@login_required
-def subscription_cancel(request, sub_id):
-    """Handle canceled PayPal payment"""
-    subscription = get_object_or_404(Subscription, id=sub_id)
-    subscription.payment_status = "failed"
-    subscription.save()
-
-    messages.error(request, "Payment was canceled.")
-    return redirect("subscription_list", profile_id=subscription.profile.id)
-
+# ========================
+# ADMIN VIEWS
+# ========================
 
 @staff_member_required
 def admin_dashboard(request):
     """List planners with their latest subscription (staff-only)."""
     q = request.GET.get("q", "").strip()
 
-    # prefetch subscriptions ordered by start_date desc (so .all.0 is latest)
     subs_prefetch = Prefetch('subscriptions', queryset=Subscription.objects.order_by('-start_date'))
     profiles_qs = Profile.objects.select_related('user').prefetch_related(subs_prefetch)
 
@@ -771,12 +881,14 @@ def admin_dashboard(request):
 
 @staff_member_required
 def admin_planner_detail(request, profile_id):
+    """Detail view of planner with subscriptions"""
     profile = get_object_or_404(Profile.objects.select_related('user').prefetch_related('subscriptions'), pk=profile_id)
     return render(request, "tour/admin_planner_detail.html", {"profile": profile})
 
 
 @staff_member_required
 def admin_subscription_edit(request, sub_id):
+    """Admin edit/extend subscription"""
     subscription = get_object_or_404(Subscription, pk=sub_id)
     if request.method == "POST":
         form = AdminSubscriptionForm(request.POST, instance=subscription)
@@ -784,7 +896,7 @@ def admin_subscription_edit(request, sub_id):
             extend_days = form.cleaned_data.get("extend_days") or 0
             sub = form.save(commit=False)
             if extend_days:
-                sub.end_date = sub.end_date + timedelta(days=extend_days)
+                sub.end_date = (sub.end_date or date.today()) + timedelta(days=extend_days)
             sub.save()
             messages.success(request, "Subscription updated.")
             return redirect("admin_dashboard")
@@ -795,12 +907,17 @@ def admin_subscription_edit(request, sub_id):
 
 @staff_member_required
 def admin_subscription_toggle(request, sub_id):
+    """Admin approves / deactivates subscription"""
     subscription = get_object_or_404(Subscription, pk=sub_id)
     if request.method == "POST":
-        subscription.is_active = not subscription.is_active
-        # optionally set payment_status when activating
-        if subscription.is_active:
-            subscription.payment_status = "completed"
+        if subscription.status == "Pending" and subscription.payment_status == "completed":
+            # Approve subscription
+            subscription.status = "Active"
+            subscription.start_date = date.today()
+            subscription.end_date = date.today() + timedelta(days=30)
+        else:
+            # Toggle deactivation
+            subscription.status = "Expired"
         subscription.save()
-        messages.success(request, f"Subscription {'activated' if subscription.is_active else 'deactivated'}.")
+        messages.success(request, f"Subscription status updated: {subscription.status}")
     return redirect("admin_dashboard")

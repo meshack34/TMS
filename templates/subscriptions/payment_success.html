@@ -1,0 +1,8 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Payment Success{% endblock %}
+{% block content %}
+<h2>✅ Payment Successful!</h2>
+<p>Your subscription <strong>{{ subscription.plan }}</strong> is paid.</p>
+<p>Waiting for admin approval before activation.</p>
+<a href="{% url 'my_subscriptions' %}" class="btn btn-primary">Back to Subscriptions</a>
+{% endblock %}

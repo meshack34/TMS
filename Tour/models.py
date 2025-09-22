@@ -98,6 +98,16 @@ class Booking(models.Model):
         }
 
 
+class Traveler(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="travelers")
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    relation = models.CharField(max_length=50, blank=True, null=True)  # e.g. child, spouse
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.booking})"
+
 class Destination(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="destinations")
     country = models.CharField(max_length=100)
@@ -127,6 +137,7 @@ class Stay(models.Model):
     rooms = models.PositiveIntegerField(default=1)
     basis = models.CharField(max_length=50, choices=[("BB", "Bed & Breakfast"), ("HB", "Half Board"), ("FB", "Full Board"), ("AI", "All Inclusive")])
     total_cost = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    travelers = models.ManyToManyField("Traveler", related_name="stays", blank=True)
 
     def save(self, *args, **kwargs):
         self.total_cost = Decimal(self.nightly_rate) * self.nights * self.rooms
@@ -143,6 +154,8 @@ class Activity(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     cost = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], default=0)
+    travelers = models.ManyToManyField("Traveler", related_name="activities", blank=True)
+
 
     def __str__(self):
         return f"{self.name} ({self.destination.name})"
@@ -153,6 +166,7 @@ class Restaurant(models.Model):
     name = models.CharField(max_length=255)
     image = models.ImageField(upload_to='restaurants/')
     description = models.TextField()
+    
 
     def __str__(self):
         return f"{self.name} ({self.destination.name})"
@@ -164,7 +178,7 @@ class DiningExpense(models.Model):
     date = models.DateField()
     description = models.TextField(blank=True, null=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
-
+    travelers = models.ManyToManyField("Traveler", related_name="dining_expenses", blank=True)
     def __str__(self):
         return f"Dining - {self.restaurant.name if self.restaurant else 'Other'} ({self.destination.name})"
 
@@ -178,9 +192,12 @@ class TravelLeg(models.Model):
     from_destination = models.ForeignKey(Destination, on_delete=models.SET_NULL, null=True, blank=True, related_name="departing_legs")
     to_destination = models.ForeignKey(Destination, on_delete=models.SET_NULL, null=True, blank=True, related_name="arriving_legs")
     cost = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], default=0)
-    
+    travelers = models.ManyToManyField("Traveler", related_name="travel_legs", blank=True)
+
     def __str__(self):
         return f"{self.mode} {self.from_location} → {self.to_location} ({self.booking.client.first_name} {self.booking.client.last_name})"
+
+
 
 class Subscription(models.Model):
     PLAN_CHOICES = [
@@ -188,15 +205,21 @@ class Subscription(models.Model):
         ("pro", "Pro"),
         ("enterprise", "Enterprise"),
     ]
+    STATUS_CHOICES = [
+        ("Pending", "Pending"),     # Planner created, waiting admin approval
+        ("Active", "Active"),       # Approved & running
+        ("Expired", "Expired"),     # End date passed
+    ]
 
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="subscriptions")
     plan = models.CharField(max_length=50, choices=PLAN_CHOICES)
     fee = models.DecimalField(max_digits=10, decimal_places=2)
-    start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField()
-    is_active = models.BooleanField(default=False)
 
-    # New fields for PayPal tracking
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+
+    # PayPal tracking
     transaction_id = models.CharField(max_length=255, blank=True, null=True)
     payment_status = models.CharField(
         max_length=50,
@@ -204,8 +227,7 @@ class Subscription(models.Model):
         default="pending",
     )
 
-    def __str__(self):
-        return f"{self.profile.user.username} - {self.plan} ({self.payment_status})"
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         indexes = [
@@ -215,14 +237,16 @@ class Subscription(models.Model):
         ]
         ordering = ['-start_date']
 
+    def __str__(self):
+        return f"{self.profile.user.username} - {self.plan} ({self.status}/{self.payment_status})"
+
     @property
     def is_expired(self):
-        return self.end_date < timezone.now().date()
+        return self.end_date and self.end_date < timezone.now().date()
 
-    def status(self):
-        today = timezone.now().date()
-        if self.end_date < today:
-            return "Expired"
-        return "Active" if self.is_active else self.payment_status.capitalize()
-
-  
+    def activate(self, months=1):
+        """Admin approves & activates subscription"""
+        self.status = "Active"
+        self.start_date = timezone.now().date()
+        self.end_date = self.start_date + timezone.timedelta(days=30 * months)
+        self.save()

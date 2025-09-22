@@ -2,7 +2,10 @@ from django import forms
 from django.forms import inlineformset_factory, modelformset_factory
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django import forms
+from .models import Profile
+from .models import Subscription
+from .models import Traveler
+from .models import Subscription
 
 from .models import (
     Client, Booking, Destination,DestinationImage, Activity, Stay, DiningExpense, TravelLeg, Restaurant
@@ -99,34 +102,63 @@ class DestinationImageForm(forms.ModelForm):
         fields = ["image"]
 
 
+
+ 
+class StayForm(forms.ModelForm):
+    class Meta:
+        model = Stay
+        fields = ["destination", "hotel_name", "nightly_rate", "nights", "rooms", "basis", "travelers"]
+
+    travelers = forms.ModelMultipleChoiceField(
+        queryset=Traveler.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
+
+    def __init__(self, *args, booking=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if booking:
+            # limit travelers to those in this booking
+            self.fields["travelers"].queryset = booking.travelers.all()
+
+class DiningExpenseForm(forms.ModelForm):
+    class Meta:
+        model = DiningExpense
+        fields = ["destination", "restaurant", "date", "description", "cost", "travelers"]
+        widgets = {"date": forms.DateInput(attrs={"type": "date"})}
+
+    travelers = forms.ModelMultipleChoiceField(
+        queryset=Traveler.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
+
+    def __init__(self, *args, booking=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if booking:
+            self.fields["travelers"].queryset = booking.travelers.all()
+
 class ActivityForm(forms.ModelForm):
     class Meta:
         model = Activity
-        fields = ["destination", "name", "date", "start_time", "end_time", "cost"]
+        fields = ["destination", "name", "date", "start_time", "end_time", "cost", "travelers"]
         widgets = {
             "date": forms.DateInput(attrs={"type": "date"}),
             "start_time": forms.TimeInput(attrs={"type": "time"}),
             "end_time": forms.TimeInput(attrs={"type": "time"}),
         }
 
+    travelers = forms.ModelMultipleChoiceField(
+        queryset=Traveler.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
 
-class StayForm(forms.ModelForm):
-    class Meta:
-        model = Stay
-        fields = ["destination", "hotel_name", "nightly_rate", "nights", "rooms", "basis"]
+    def __init__(self, *args, booking=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if booking:
+            self.fields["travelers"].queryset = booking.travelers.all()
 
-
-class DiningExpenseForm(forms.ModelForm):
-    class Meta:
-        model = DiningExpense
-        fields = ["destination", "restaurant", "date", "description", "cost"]
-        widgets = {"date": forms.DateInput(attrs={"type": "date"})}
-
-
-class RestaurantForm(forms.ModelForm):
-    class Meta:
-        model = Restaurant
-        fields = ["destination", "name", "image", "description"]
 
 
 class TravelLegForm(forms.ModelForm):
@@ -141,32 +173,64 @@ class TravelLegForm(forms.ModelForm):
             "from_destination",
             "to_destination",
             "cost",
+            "travelers",
         ]
         widgets = {"date": forms.DateInput(attrs={"type": "date"})}
-# forms.py
-from django import forms
-from .models import Profile
+
+    travelers = forms.ModelMultipleChoiceField(
+        queryset=Traveler.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
+
+    def __init__(self, *args, booking=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if booking:
+            self.fields["travelers"].queryset = booking.travelers.all()
+
+
+
+
+class RestaurantForm(forms.ModelForm):
+    class Meta:
+        model = Restaurant
+        fields = ["destination", "name", "image", "description"]
+
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["profile_picture", "phone", "company_name"]
 
-from django import forms
-from .models import Subscription
+
 
 class SubscriptionForm(forms.ModelForm):
     class Meta:
         model = Subscription
-        fields = ["plan", "fee", "start_date", "end_date", "is_active"]
+        fields = ["plan", "fee", "start_date", "end_date"]
+        widgets = {
+            "start_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "end_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "fee": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+        }
 
 
-from django import forms
-from .models import Subscription
+
+class TravelerForm(forms.ModelForm):
+    class Meta:
+        model = Traveler
+        fields = ["first_name", "last_name", "age", "relation"]
+
 
 class AdminSubscriptionForm(forms.ModelForm):
-    extend_days = forms.IntegerField(required=False, min_value=1, help_text="Add days to end date", label="Extend by (days)")
+    extend_days = forms.IntegerField(
+        required=False,
+        min_value=1,
+        help_text="Add days to end date",
+        label="Extend by (days)"
+    )
 
     class Meta:
         model = Subscription
-        fields = ['plan', 'fee', 'end_date', 'is_active', 'payment_status', 'transaction_id']
+        fields = ['plan', 'fee', 'end_date', 'status', 'payment_status', 'transaction_id']

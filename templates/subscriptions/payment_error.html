@@ -1,0 +1,6 @@
+{% extends "base_dashboard.html" %}
+{% block content %}
+<h2>Payment Failed ❌</h2>
+<p>{{ error.message }}</p>
+<a href="{% url 'my_subscriptions' %}">Back to Subscriptions</a>
+{% endblock %}

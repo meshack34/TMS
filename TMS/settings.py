@@ -23,6 +23,8 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     "Tour",
     "widget_tweaks",
+    "crispy_forms",
+    "crispy_bootstrap5",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -96,7 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 
@@ -114,5 +116,13 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+PAYPAL_CLIENT_ID = "AQRk_BNJ53jb5kdVbkLQBrjFLBCPfzGszSEeME7-9Zpv0EQjvMeuhjs9p25G7-du1XYzrBkaO7wfe5c3"
+PAYPAL_CLIENT_SECRET = "EKOf5W7Uli_WV5LHkbn6jNMEwIvqVFvv8cvNnlp4wBGNaaAyFBjAFmrNOdD2u72AsFbd3UqlEi6RYRkB"
+PAYPAL_MODE = "sandbox"
