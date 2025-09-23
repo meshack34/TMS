@@ -1,54 +1,126 @@
 {% extends "base_dashboard.html" %}
 {% block content %}
-<h1>Admin Dashboard — Planners</h1>
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="row">
+    <div class="col-12">
 
-<form method="get" style="margin-bottom:1rem;">
-  <input type="text" name="q" value="{{ q }}" placeholder="Search by username, email or company" />
-  <button type="submit">Search</button>
-</form>
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Admin Dashboard — Planners</h3>
+      </div>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>User</th><th>Email</th><th>Company</th><th>Latest Plan</th><th>Status / Ends</th><th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for profile in profiles %}
-      {% with latest=profile.subscriptions.all.0 %}
-      <tr>
-        <td>{{ profile.user.username }}</td>
-        <td>{{ profile.user.email }}</td>
-        <td>{{ profile.company_name|default:"—" }}</td>
-        <td>{% if latest %}{{ latest.plan }}{% else %}—{% endif %}</td>
-        <td>
-            {% if latest %}
-                {{ latest.status }} — {{ latest.end_date }}
-            {% else %}
-                No subscription
-            {% endif %}
-        </td>
-        <td>
-          <a href="{% url 'admin_planner_detail' profile.id %}">View</a>
-          {% if latest %}
-            <a href="{% url 'admin_subscription_edit' latest.id %}">Edit</a>
-            <form method="post" action="{% url 'admin_subscription_toggle' latest.id %}" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit">{% if latest.is_active %}Deactivate{% else %}Activate{% endif %}</button>
-            </form>
+      <!-- Search Form -->
+      <form method="get" class="mb-3">
+        <div class="input-group">
+          <input type="text" name="q" value="{{ q }}" class="form-control" 
+                 placeholder="Search by username, email or company">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search"></i> Search
+          </button>
+        </div>
+      </form>
+
+      <!-- Card Wrapper -->
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+
+          <!-- Table -->
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Company</th>
+                  <th>Latest Plan</th>
+                  <th>Status / Ends</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for profile in profiles %}
+                  {% with latest=profile.subscriptions.all.0 %}
+                  <tr>
+                    <td>{{ profile.user.username }}</td>
+                    <td>{{ profile.user.email }}</td>
+                    <td>{{ profile.company_name|default:"—" }}</td>
+                    <td>{% if latest %}{{ latest.plan }}{% else %}—{% endif %}</td>
+                    <td>
+                      {% if latest %}
+                        <span class="badge bg-{% if latest.is_active %}success{% else %}secondary{% endif %}">
+                          {{ latest.status }}
+                        </span>
+                        <small class="text-muted d-block">{{ latest.end_date }}</small>
+                      {% else %}
+                        <span class="text-muted">No subscription</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="d-flex gap-2">
+                        <a href="{% url 'admin_planner_detail' profile.id %}" 
+                           class="btn btn-sm btn-outline-primary">
+                          <i class="bi bi-eye"></i> View
+                        </a>
+                        {% if latest %}
+                          <a href="{% url 'admin_subscription_edit' latest.id %}" 
+                             class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i> Edit
+                          </a>
+                          <form method="post" action="{% url 'admin_subscription_toggle' latest.id %}" 
+                                style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                    class="btn btn-sm {% if latest.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                              {% if latest.is_active %}
+                                <i class="bi bi-x-circle"></i> Deactivate
+                              {% else %}
+                                <i class="bi bi-check-circle"></i> Activate
+                              {% endif %}
+                            </button>
+                          </form>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                  {% endwith %}
+                {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                      No planners found.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          {% if profiles.has_previous %}
+            <a href="?page={{ profiles.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" 
+               class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-arrow-left"></i> Previous
+            </a>
           {% endif %}
-        </td>
-      </tr>
-      {% endwith %}
-    {% empty %}
-      <tr><td colspan="6">No planners found.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+        </div>
+        <div class="text-muted small">
+          Page {{ profiles.number }} of {{ profiles.paginator.num_pages }}
+        </div>
+        <div>
+          {% if profiles.has_next %}
+            <a href="?page={{ profiles.next_page_number }}{% if q %}&q={{ q }}{% endif %}" 
+               class="btn btn-sm btn-outline-secondary">
+              Next <i class="bi bi-arrow-right"></i>
+            </a>
+          {% endif %}
+        </div>
+      </div>
 
-<div class="pagination">
-  {% if profiles.has_previous %}<a href="?page={{ profiles.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Previous</a>{% endif %}
-  Page {{ profiles.number }} of {{ profiles.paginator.num_pages }}
-  {% if profiles.has_next %}<a href="?page={{ profiles.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Next</a>{% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}
