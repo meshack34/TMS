@@ -1,3 +1,20 @@
+<style>
+/* Custom logout button */
+.btn-logout {
+    background-color: #0d6efd; 
+    border: 1px solid #336699;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease; /* smooth effect */
+}
+
+.btn-logout:hover {
+    background-color: transparent; /* no background on hover */
+    color: white; /* keep text white */
+    border: 1px solid #336699; /* keep border consistent */
+}
+</style>
+
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm fixed-top" style="background-color: #004d80;">
   <div class="container-fluid">
     <!-- Logo -->
@@ -16,9 +33,8 @@
     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
       <li class="nav-item">
         {% if request.user.is_authenticated %}
-        <!-- Logout button: lighter dark blue -->
-        <a class="btn fw-bold text-white" href="{% url 'logout' %}" 
-           style="background-color: #0d6efd; border: 1px solid #336699;">
+        <!-- Logout button with custom style -->
+        <a class="btn btn-logout" href="{% url 'logout' %}">
           Logout
         </a>
         {% else %}

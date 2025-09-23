@@ -1,10 +1,57 @@
 {% extends "base_dashboard.html" %}
 {% block title %}New Subscription{% endblock %}
 {% block content %}
-<h2>Subscription Form</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button class="btn btn-primary">Save</button>
-</form>
+
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="container">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">New Subscription</h2>
+      <a href="{% url 'my_subscriptions' %}" class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Back to Subscriptions
+      </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+              </label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <!-- Buttons -->
+          <div class="d-flex gap-2 pt-2">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-check-circle me-1"></i> Save
+            </button>
+            <a href="{% url 'my_subscriptions' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll("input, select, textarea").forEach(function(el) {
+    el.classList.add("form-control");
+  });
+});
+</script>
+
 {% endblock %}

@@ -149,28 +149,14 @@
   </div> <!-- /booking-report -->
 
   <!-- Action Buttons -->
+ <!-- Action Buttons -->
   <div class="mt-4 d-flex gap-2">
-    <!-- Old backend link removed -->
-    <button id="download" class="btn btn-success shadow-sm">
+    <a href="{% url 'booking_pdf' booking.pk %}" class="btn btn-success shadow-sm" target="_blank">
       <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
-    </button>
+    </a>
   </div>
 </div>
 
-<!-- html2pdf.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script>
-document.getElementById("download").addEventListener("click", () => {
-  const element = document.getElementById("booking-report");
-  const opt = {
-    margin:       0.5,
-    filename:     "booking_{{ booking.id }}.pdf",
-    image:        { type: "jpeg", quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: "in", format: "a4", orientation: "portrait" }
-  };
-  html2pdf().set(opt).from(element).save();
-});
-</script>
+
 
 {% endblock %}

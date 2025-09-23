@@ -562,140 +562,31 @@ import os
 
 from .models import Booking
 
+from django.http import HttpResponse
+from django.template.loader import get_template
+from weasyprint import HTML
+import tempfile
 
-@login_required
+from .models import Booking
+
 def booking_pdf(request, pk):
-    booking = get_object_or_404(Booking, pk=pk)
+    booking = Booking.objects.get(pk=pk)
+    travel_legs = booking.travel_legs.all()
 
-    # PDF Response
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="booking_{pk}.pdf"'
+    # Load the HTML template you wrote for the PDF
+    template = get_template("tour/booking_pdf.html")
+    html_string = template.render({
+        "booking": booking,
+        "travel_legs": travel_legs,
+    })
 
-    # Document setup
-    doc = SimpleDocTemplate(
-        response,
-        pagesize=A4,
-        rightMargin=40,
-        leftMargin=40,
-        topMargin=40,
-        bottomMargin=40,
-    )
-    styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name="CenterTitle", fontSize=18, alignment=1, spaceAfter=20, textColor=colors.HexColor("#0056A6")))
-    styles.add(ParagraphStyle(name="SectionHeading", fontSize=13, spaceBefore=15, spaceAfter=10, textColor=colors.HexColor("#333333"), underlineWidth=0.5))
-    styles.add(ParagraphStyle(name="NormalText", fontSize=10, leading=14, spaceAfter=6))
-
-    elements = []
-
-    # ---------------- HEADER ----------------
-    elements.append(Paragraph("Tour Travel Management System", styles["Title"]))
-    elements.append(Paragraph(f"Booking Report", styles["CenterTitle"]))
-
-    client_name = f"{booking.client.first_name} {booking.client.last_name}"
-    elements.append(Paragraph(f"Client: <b>{client_name}</b>", styles["NormalText"]))
-    elements.append(Paragraph(f"Booking ID: <b>{booking.pk}</b>", styles["NormalText"]))
-
-    # ---------------- SUMMARY ----------------
-    # Booking Info
-    info_data = [
-        ["Client:", client_name],
-        ["Start Date:", str(booking.start_date)],
-        ["End Date:", str(booking.end_date)],
-    ]
-    info_table = Table(info_data, colWidths=[120, 300])
-    info_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
-        ("BOX", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.grey),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-    ]))
-    elements.append(Paragraph("Booking Information", styles["SectionHeading"]))
-    elements.append(info_table)
-    elements.append(Spacer(1, 15))
-
-    # Cost Breakdown
-    breakdown = booking.cost_breakdown()
-    cost_data = [["Category", "Cost (KSH)"]]
-    for k, v in breakdown.items():
-        cost_data.append([k, f"{v:,.2f}"])  # formatted with commas
-    cost_table = Table(cost_data, colWidths=[200, 150])
-    cost_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0056A6")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-        ("ALIGN", (1, 1), (-1, -1), "RIGHT"),
-        ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-    ]))
-    elements.append(Paragraph("Cost Breakdown", styles["SectionHeading"]))
-    elements.append(cost_table)
-    elements.append(Spacer(1, 15))
-
-    # Travel Itinerary
-    legs = booking.travel_legs.all()
-    if legs:
-        travel_data = [["Date", "Mode", "From", "To", "Cost (KSH)"]]
-        for leg in legs:
-            travel_data.append([
-                str(leg.date),
-                leg.mode,
-                str(leg.from_destination or leg.from_location),
-                str(leg.to_destination or leg.to_location),
-                f"{leg.cost:,.2f}",  # formatted with commas
-            ])
-        travel_table = Table(travel_data, colWidths=[70, 70, 120, 120, 70])
-        travel_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#444444")),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-            ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
-            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-            ("FONTSIZE", (0, 0), (-1, -1), 9),
-        ]))
-        elements.append(Paragraph("Travel Itinerary", styles["SectionHeading"]))
-        elements.append(travel_table)
-        elements.append(Spacer(1, 15))
-
-    # ---------------- FULL-PAGE IMAGES ----------------
-    elements.append(PageBreak())
-    elements.append(Paragraph("Destinations & Restaurants", styles["SectionHeading"]))
-
-    max_width, max_height = A4[0] - 80, A4[1] - 80  # fit inside margins
-
-    # Destinations
-    for d in booking.destinations.all():
-        for g in d.galleries.all():
-            if g.image and os.path.exists(g.image.path):
-                try:
-                    elements.append(PageBreak())
-                    elements.append(Paragraph(f"Destination: {d.name}", styles["CenterTitle"]))
-                    img = RLImage(g.image.path)
-                    img._restrictSize(max_width, max_height)
-                    elements.append(img)
-                except Exception:
-                    pass
-
-    # Restaurants
-    for d in booking.destinations.all():
-        for r in d.restaurants.all():
-            if r.image and os.path.exists(r.image.path):
-                try:
-                    elements.append(PageBreak())
-                    elements.append(Paragraph(f"Restaurant: {r.name}", styles["CenterTitle"]))
-                    img = RLImage(r.image.path)
-                    img._restrictSize(max_width, max_height)
-                    elements.append(img)
-                except Exception:
-                    pass
-
-    # ---------------- FOOTER ----------------
-    elements.append(PageBreak())
-    elements.append(Paragraph("<i>Generated by Tour Travel Management System © 2025</i>", styles["NormalText"]))
-
-    # Build PDF
-    doc.build(elements)
-    return response
+    # Create a PDF
+    with tempfile.NamedTemporaryFile(delete=True) as output:
+        HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(output.name)
+        output.seek(0)
+        response = HttpResponse(output.read(), content_type="application/pdf")
+        response['Content-Disposition'] = f'attachment; filename="Booking_{booking.id}.pdf"'
+        return response
 
 
 
