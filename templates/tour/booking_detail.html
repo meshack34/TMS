@@ -10,8 +10,8 @@
       <i class="bi bi-journal-bookmark-fill text-primary me-2"></i> 
       Booking #{{ booking.id }} Details
     </h4>
-    <a href="{% url 'booking_list' %}" class="btn btn-outline-secondary btn-sm shadow-sm">
-      <i class="bi bi-arrow-left me-1"></i> Back to Bookings
+    <a href="{% url 'iterinary' %}" class="btn btn-outline-secondary btn-sm shadow-lg">
+      <i class="bi bi-arrow-left me-1"></i> Back to Itinerary
     </a>
   </div>
 
@@ -21,22 +21,29 @@
     <div class="row g-4">
       <!-- LEFT COLUMN -->
       <div class="col-lg-8">
-        <!-- Client Info -->
-        <div class="card shadow-sm border-0 mb-4">
-          <div class="card-header bg-white fw-semibold">Client Information</div>
-          <div class="card-body">
-            <p><span class="text-muted"><i class="bi bi-person me-1"></i> Client:</span> 
-               {{ booking.client.first_name }} {{ booking.client.last_name }}</p>
-            <p><span class="text-muted"><i class="bi bi-calendar me-1"></i> Start:</span> {{ booking.start_date }}</p>
-            <p><span class="text-muted"><i class="bi bi-calendar-check me-1"></i> End:</span> {{ booking.end_date }}</p>
-            <a href="{% url 'add_destination' booking.pk %}" class="btn btn-primary btn-sm">
-              <i class="bi bi-plus-circle me-1"></i> Add Destination
-            </a>
-          </div>
+    <!-- Client Info -->
+    <div class="card shadow-lg border-0 mb-4">
+      <div class="card-header bg-white fw-semibold">Client Information</div>
+      <div class="card-body">
+        <p><span class="text-muted"><i class="bi bi-person me-1"></i> Client:</span> 
+          {{ booking.client.first_name }} {{ booking.client.last_name }}</p>
+        <p><span class="text-muted"><i class="bi bi-calendar me-1"></i> Start:</span> {{ booking.start_date }}</p>
+        <p><span class="text-muted"><i class="bi bi-calendar-check me-1"></i> End:</span> {{ booking.end_date }}</p>
+        
+        <div class="d-flex gap-2">
+          <a href="{% url 'add_destination' booking.pk %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Add Destination
+          </a>
+          <a href="{% url 'add_traveler' booking.pk %}" class="btn btn-info btn-sm">
+            <i class="bi bi-person-plus me-1"></i> Add Traveler
+          </a>
         </div>
+      </div>
+    </div>
+
 
         <!-- Cost Breakdown -->
-        <div class="card shadow-sm border-0 mb-4">
+        <div class="card shadow-lg border-0 mb-4">
           <div class="card-header bg-white fw-semibold">Cost Breakdown</div>
           <div class="card-body p-0">
             {% with breakdown=booking.cost_breakdown %}
@@ -60,7 +67,7 @@
         </div>
 
         <!-- Travel Itinerary -->
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-lg border-0">
           <div class="card-header bg-white fw-semibold">Travel Destination Summary</div>
           <div class="card-body p-0">
             <table class="table table-striped table-hover align-middle mb-0">
@@ -94,17 +101,17 @@
       <!-- RIGHT COLUMN -->
       <div class="col-lg-4">
         <!-- Destinations -->
-        <div class="card shadow-sm border-0 mb-4">
+        <div class="card shadow-lg border-0 mb-4">
           <div class="card-header bg-white fw-semibold">Destinations</div>
           <div class="card-body">
             {% for d in booking.destinations.all %}
-              <div class="card mb-3 border-0 shadow-sm">
+              <div class="card mb-3 border-0 shadow-lg">
                 <div class="card-body p-2">
                   <h6 class="card-title text-center fw-semibold mb-2">{{ d.name }}</h6>
                   <div class="row g-2">
                     {% for g in d.galleries.all|slice:":3" %}
                       <div class="col-4">
-                        <img src="{{ g.image.url }}" class="img-fluid rounded shadow-sm"
+                        <img src="{{ g.image.url }}" class="img-fluid rounded shadow-lg"
                              style="height:100px; width:100%; object-fit:cover;" alt="{{ d.name }}">
                       </div>
                     {% empty %}
@@ -120,13 +127,13 @@
         </div>
 
         <!-- Restaurants -->
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-lg border-0">
           <div class="card-header bg-white fw-semibold">Restaurants</div>
           <div class="card-body">
             {% with all_dests=booking.destinations.all %}
               {% for d in all_dests %}
                 {% for r in d.restaurants.all %}
-                  <div class="card mb-3 shadow-sm border-0">
+                  <div class="card mb-3 shadow-lg border-0">
                     {% if r.image %}
                       <img src="{{ r.image.url }}" class="card-img-top"
                            style="height:150px; object-fit:cover;" alt="{{ r.name }}">
@@ -151,7 +158,7 @@
   <!-- Action Buttons -->
  <!-- Action Buttons -->
   <div class="mt-4 d-flex gap-2">
-    <a href="{% url 'booking_pdf' booking.pk %}" class="btn btn-success shadow-sm" target="_blank">
+    <a href="{% url 'booking_pdf' booking.pk %}" class="btn btn-success shadow-lg" target="_blank">
       <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
     </a>
   </div>

@@ -15,7 +15,7 @@
     <div class="row g-4">
       <!-- Left: Profile Summary -->
       <div class="col-md-4">
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-lg">
           <div class="card-header text-center bg-gradient" 
                style="background: linear-gradient(135deg, #0d6efd, #198754);">
             {% if profile.profile_picture %}
@@ -43,7 +43,7 @@
 
       <!-- Right: Edit Profile Form -->
       <div class="col-md-8">
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-lg">
           <div class="card-header bg-primary text-white">
             <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Update Profile</h5>
           </div>
@@ -69,7 +69,7 @@
               <!-- Phone -->
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Phone</label>
-                {{ form.phone|add_class:"form-control shadow-sm" }}
+                {{ form.phone|add_class:"form-control shadow-lg" }}
                 {% if form.phone.errors %}
                   <div class="text-danger small mt-1">{{ form.phone.errors|striptags }}</div>
                 {% endif %}
@@ -78,7 +78,7 @@
               <!-- Company Name -->
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Company Name</label>
-                {{ form.company_name|add_class:"form-control shadow-sm" }}
+                {{ form.company_name|add_class:"form-control shadow-lg" }}
                 {% if form.company_name.errors %}
                   <div class="text-danger small mt-1">{{ form.company_name.errors|striptags }}</div>
                 {% endif %}
@@ -88,7 +88,7 @@
               <div class="col-md-12">
                 <label class="form-label fw-semibold">Profile Picture</label>
                 <div class="input-group">
-                  {{ form.profile_picture|add_class:"form-control shadow-sm" }}
+                  {{ form.profile_picture|add_class:"form-control shadow-lg" }}
                   <label class="input-group-text"><i class="bi bi-upload"></i></label>
                 </div>
                 {% if form.profile_picture.errors %}
@@ -98,7 +98,7 @@
 
               <!-- Save Button -->
               <div class="col-12 text-end">
-                <button type="submit" class="btn btn-success px-4 shadow-sm">
+                <button type="submit" class="btn btn-success px-4 shadow-lg">
                   <i class="bi bi-save me-1"></i> Save Changes
                 </button>
               </div>

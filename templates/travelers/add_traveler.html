@@ -1,0 +1,84 @@
+{% extends "base_dashboard.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">
+          <i class="bi bi-person-plus text-primary me-2"></i> 
+          Add Traveler for {{ booking.client }}
+        </h3>
+        <a href="{% url 'booking_detail' booking.id %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+      </div>
+
+      <!-- Traveler Form -->
+      <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="row">
+              <!-- First Name -->
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">First Name</label>
+                {{ form.first_name|add_class:"form-control" }}
+                {% if form.first_name.errors %}
+                  <div class="text-danger small mt-1">{{ form.first_name.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Last Name -->
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">Last Name</label>
+                {{ form.last_name|add_class:"form-control" }}
+                {% if form.last_name.errors %}
+                  <div class="text-danger small mt-1">{{ form.last_name.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Age -->
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.age.id_for_label }}" class="form-label fw-semibold">Age</label>
+                {{ form.age|add_class:"form-control" }}
+                {% if form.age.errors %}
+                  <div class="text-danger small mt-1">{{ form.age.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Relation -->
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.relation.id_for_label }}" class="form-label fw-semibold">Relation</label>
+                {{ form.relation|add_class:"form-control" }}
+                {% if form.relation.errors %}
+                  <div class="text-danger small mt-1">{{ form.relation.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              <a href="{% url 'booking_detail' booking.id %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+              </a>
+              <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle me-1"></i> Save Traveler
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

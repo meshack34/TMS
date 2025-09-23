@@ -44,7 +44,7 @@
 <div class="container-fluid py-4 bg-light min-vh-100">
 
   <!-- Greeting -->
-  <div class="card shadow-sm border-0 mb-4">
+  <div class="card shadow-lg border-0 mb-4">
     <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
       <div class="mb-3 mb-md-0">
         <h4 class="fw-bold mb-1">
@@ -54,9 +54,9 @@
       </div>
       <div>
         {% if profile.profile_picture %}
-          <img src="{{ profile.profile_picture.url }}" class="rounded-circle shadow-sm border" width="65" height="65" alt="Profile">
+          <img src="{{ profile.profile_picture.url }}" class="rounded-circle shadow-lg border" width="65" height="65" alt="Profile">
         {% else %}
-          <div class="bg-primary bg-opacity-25 text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width:65px; height:65px;">
+          <div class="bg-primary bg-opacity-25 text-primary rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width:65px; height:65px;">
             <i class="bi bi-person fs-2"></i>
           </div>
         {% endif %}
@@ -67,7 +67,7 @@
   <!-- Stat Cards -->
   <div class="row g-3 mb-4">
     <div class="col-md-3 col-6">
-      <div class="card shadow-sm border-0 text-center p-3 h-100">
+      <div class="card shadow-lg border-0 text-center p-3 h-100">
         <div class="stat-icon bg-primary bg-opacity-10 mb-3">
           <i class="bi bi-people fs-3 text-primary"></i>
         </div>
@@ -77,7 +77,7 @@
     </div>
 
     <div class="col-md-3 col-6">
-      <div class="card shadow-sm border-0 text-center p-3 h-100">
+      <div class="card shadow-lg border-0 text-center p-3 h-100">
         <div class="stat-icon bg-success bg-opacity-10 mb-3">
           <i class="bi bi-calendar-check fs-3 text-success"></i>
         </div>
@@ -87,7 +87,7 @@
     </div>
 
     <div class="col-md-3 col-6">
-      <div class="card shadow-sm border-0 text-center p-3 h-100">
+      <div class="card shadow-lg border-0 text-center p-3 h-100">
         <div class="stat-icon bg-danger bg-opacity-10 mb-3">
           <i class="bi bi-geo-alt fs-3 text-danger"></i>
         </div>
@@ -97,7 +97,7 @@
     </div>
 
     <div class="col-md-3 col-6">
-      <div class="card shadow-sm border-0 text-center p-3 h-100">
+      <div class="card shadow-lg border-0 text-center p-3 h-100">
         <div class="stat-icon bg-warning bg-opacity-10 mb-3">
           <i class="bi bi-activity fs-3 text-warning"></i>
         </div>
@@ -110,7 +110,7 @@
   <div class="row g-4">
     <!-- Recent Bookings -->
     <div class="col-lg-7">
-      <div class="card shadow-sm border-0 h-100">
+      <div class="card shadow-lg border-0 h-100">
         <div class="card-header bg-white">Recent Bookings</div>
         <div class="card-body p-0">
           <div class="table-responsive">
@@ -143,7 +143,7 @@
 
     <!-- Quick Profile -->
     <div class="col-lg-5">
-      <div class="card shadow-sm border-0 h-100">
+      <div class="card shadow-lg border-0 h-100">
         <div class="card-header bg-white">Your Profile</div>
         <div class="card-body profile-info">
           <p><span class="text-muted"><i class="bi bi-person"></i> Username:</span> {{ request.user.username }}</p>
