@@ -27,8 +27,8 @@
                    class="rounded-circle border border-3 border-white shadow mb-2"
                    width="120" height="120" alt="Profile Picture">
             {% endif %}
-            <h4 class="text-white mb-0">{{ request.user.username }}</h4>
-            <p class="text-light small">{{ request.user.email }}</p>
+            <h4 class="text-dark mb-0">{{ request.user.username }}</h4>
+            <p class="text-dark small">{{ request.user.email }}</p>
           </div>
           <div class="card-body text-center">
             {% if profile.company_name %}

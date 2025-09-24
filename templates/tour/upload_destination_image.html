@@ -2,23 +2,24 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="container-fluid py-4 bg-light min-vh-100">
+<div class="container py-4">
   <div class="row justify-content-center">
     <!-- Wider form column -->
     <div class="col-12 col-xl-8">
 
-      <!-- Page Header -->
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0">Upload Image for {{ destination.name }}</h3>
-        <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
-          <i class="bi bi-arrow-left me-1"></i> Back
-        </a>
-      </div>
+      <!-- Card wrapping header and form -->
+      <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body bg-light p-4">
 
-      <!-- Form Card -->
-      <div class="card shadow-lg border-0">
-        <div class="card-body">
+          <!-- Page Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">Upload Image for {{ destination.name }}</h3>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+          </div>
 
+          <!-- Upload Form -->
           <form method="POST" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
 

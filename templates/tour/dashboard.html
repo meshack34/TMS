@@ -126,7 +126,7 @@
               <tbody>
                 {% for booking in recent_bookings %}
                   <tr>
-                    <td>{{ booking.client.name }}</td>
+                    <td>{{ booking.client }}</td>
                     <td>{{ booking.start_date }}</td>
                     <td>{{ booking.end_date }}</td>
                     <td class="fw-semibold">KSH {{ booking.grand_total|floatformat:2 }}</td>

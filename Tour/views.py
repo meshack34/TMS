@@ -423,6 +423,11 @@ def upload_destination_image(request, pk):
         "tour/upload_destination_image.html",
         {"form": form, "destination": destination},
     )
+from datetime import datetime, timedelta
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+
 @login_required
 def upload_activity(request, destination_id):
     destination = get_object_or_404(Destination, id=destination_id)
@@ -437,12 +442,28 @@ def upload_activity(request, destination_id):
             form.save_m2m()  # save travelers
             messages.success(request, "Activity added successfully.")
             return redirect("booking_detail", pk=booking.id)
-
     else:
         form = ActivityForm(booking=booking)
 
-    return render(request, "tour/upload_activity.html", {"form": form, "destination": destination})
+    # ✅ Generate time slots (06:00 – 20:30 in 30-min steps)
+    times = []
+    start = datetime.strptime("06:00", "%H:%M")
+    end = datetime.strptime("20:30", "%H:%M")
+    step = timedelta(minutes=30)
 
+    while start <= end:
+        times.append(start.strftime("%H:%M"))
+        start += step
+
+    return render(
+        request,
+        "tour/upload_activity.html",
+        {
+            "form": form,
+            "destination": destination,
+            "time_slots": times,   # 👈 pass to template
+        },
+    )
 
 
 
